@@ -7,10 +7,8 @@ import {BenefitsPool} from "../src/BenefitsPool.sol";
 import {MockcUSD} from "../src/MockcUSD.sol";
 
 contract DeployBenefitsPool is Script {
-    // Celo Sepolia Testnet cUSD address
-    address constant CUSD_SEPOLIA = 0x4822e58de6f5e485eF90df51C41CE01721331dC0;
-    // Celo Alfajores cUSD address
-    address constant CUSD_ALFAJORES = 0x874069Fa1Eb16D44d622F2e0Ca25eeA172369bC1;
+    // Celo Sepolia Testnet cUSD address (with checksum)
+    address constant CUSD_SEPOLIA = 0x00BFD44e79FB7f6dd5887A9426c8EF85A0CD23e0; // cUSD on Celo Sepolia
     // Celo Mainnet cUSD address
     address constant CUSD_MAINNET = 0x765DE816845861e75A25fCA122bb6898B8B1282a;
 
@@ -18,32 +16,16 @@ contract DeployBenefitsPool is Script {
         // Get private key from environment
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
 
-        // Get the chain ID to determine which cUSD address to use
-        uint256 chainId = block.chainid;
-        address cUSDAddress;
-
-        if (chainId == 44787) {
-            // Alfajores Testnet
-            cUSDAddress = CUSD_ALFAJORES;
-            console.log("Deploying to Celo Alfajores Testnet");
-        } else if (chainId == 1740) {
-            // Sepolia Testnet
-            cUSDAddress = CUSD_SEPOLIA;
-            console.log("Deploying to Celo Sepolia Testnet");
-        } else if (chainId == 42220) {
-            // Celo Mainnet
-            cUSDAddress = CUSD_MAINNET;
-            console.log("Deploying to Celo Mainnet");
-        } else {
-            revert("Unsupported network");
-        }
+        // For Sepolia testnet
+        address cUSDAddress = CUSD_SEPOLIA;
+        console.log("Deploying to Celo Sepolia Testnet");
 
         console.log("Using cUSD address:", cUSDAddress);
         console.log("Deployer:", vm.addr(deployerPrivateKey));
 
         vm.startBroadcast(deployerPrivateKey);
 
-        // Deploy BenefitsPool
+        // Deploy BenefitsPool with cUSD token address
         BenefitsPool pool = new BenefitsPool(cUSDAddress);
 
         console.log("BenefitsPool deployed to:", address(pool));
