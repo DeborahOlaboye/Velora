@@ -229,10 +229,7 @@ contract BenefitsPoolTest is Test {
         vm.prank(worker1);
         uint256 requestId = pool.requestWithdrawal(100 * 10**18, "First emergency");
 
-        // Fast forward past voting period
-        vm.warp(block.timestamp + 8 days);
-
-        // Approve and execute the first withdrawal
+        // Approve and execute the first withdrawal (this will handle the voting period)
         _approveWithdrawal(requestId);
 
         // Try to request another withdrawal immediately - should fail due to cooldown
@@ -240,8 +237,8 @@ contract BenefitsPoolTest is Test {
         vm.expectRevert("Cooldown period active");
         pool.requestWithdrawal(100 * 10**18, "Second emergency");
 
-        // Fast forward past cooldown period
-        uint256 cooldownPeriod = 30 days; // Assuming 30 days cooldown
+        // Fast forward past cooldown period (90 days as per contract)
+        uint256 cooldownPeriod = 90 days;
         vm.warp(block.timestamp + cooldownPeriod + 1);
 
         // Now the withdrawal should succeed
@@ -478,6 +475,10 @@ contract BenefitsPoolTest is Test {
             pool.voteOnWithdrawal(requestId, true);
         }
 
+        // Fast forward past voting period
+        vm.warp(block.timestamp + 8 days);
+        
+        // Execute the withdrawal
         pool.executeWithdrawal(requestId);
     }
 }
