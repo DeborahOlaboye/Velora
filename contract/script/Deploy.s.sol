@@ -7,7 +7,7 @@ import {BenefitsPool} from "../src/BenefitsPool.sol";
 import {MockcUSD} from "../src/MockcUSD.sol";
 
 contract DeployBenefitsPool is Script {
-    // Celo Sepolia Testnet cUSD address (with checksum)
+    // Celo Sepolia Testnet cUSD address
     address constant CUSD_SEPOLIA = 0x00BFD44e79FB7f6dd5887A9426c8EF85A0CD23e0; // cUSD on Celo Sepolia
     // Celo Mainnet cUSD address
     address constant CUSD_MAINNET = 0x765DE816845861e75A25fCA122bb6898B8B1282a;
