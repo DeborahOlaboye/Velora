@@ -225,20 +225,29 @@ contract BenefitsPoolTest is Test {
     function test_CannotWithdrawDuringCooldown() public {
         _setupWorkerWithContributions(worker1, 1000 * 10**18);
 
-        // First withdrawal
+        // First withdrawal request
         vm.prank(worker1);
         uint256 requestId = pool.requestWithdrawal(100 * 10**18, "First emergency");
 
         // Fast forward past voting period
         vm.warp(block.timestamp + 8 days);
 
-        // Approve and execute
+        // Approve and execute the first withdrawal
         _approveWithdrawal(requestId);
 
-        // Try to request another withdrawal immediately
+        // Try to request another withdrawal immediately - should fail due to cooldown
         vm.prank(worker1);
         vm.expectRevert("Cooldown period active");
         pool.requestWithdrawal(100 * 10**18, "Second emergency");
+
+        // Fast forward past cooldown period
+        uint256 cooldownPeriod = 30 days; // Assuming 30 days cooldown
+        vm.warp(block.timestamp + cooldownPeriod + 1);
+
+        // Now the withdrawal should succeed
+        vm.prank(worker1);
+        uint256 newRequestId = pool.requestWithdrawal(100 * 10**18, "After cooldown");
+        assertTrue(newRequestId > 0, "Should be able to request after cooldown");
     }
 
     /*//////////////////////////////////////////////////////////////
