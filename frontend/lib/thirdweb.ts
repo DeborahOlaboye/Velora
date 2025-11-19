@@ -1,9 +1,4 @@
-import { createThirdwebClient, defineChain } from "thirdweb";
-
-// Create thirdweb client
-export const client = createThirdwebClient({
-  clientId: process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID || "",
-});
+import { defineChain } from "thirdweb";
 
 // Define Celo Sepolia testnet
 export const celoSepolia = defineChain({
