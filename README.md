@@ -111,6 +111,25 @@ npm run contracts:test
 npm run contracts:deploy
 ```
 
+## Code Quality & AI Assistant
+
+This project is configured with **Qodo** for AI-powered code quality, security analysis, and development assistance.
+
+### Features
+- 🔒 **Smart Contract Security Scanning** - Automatic vulnerability detection
+- ⛽ **Gas Optimization** - Suggestions for reducing gas costs
+- 🧪 **Automated Testing** - Pre-commit test runs and coverage tracking
+- 📝 **Documentation Generation** - Auto-generated docs with NatSpec
+- 🔍 **Code Review** - AI-powered code review on commits/PRs
+
+### Quick Start
+See [QODO.md](./QODO.md) for detailed configuration and usage guide.
+
+### Configuration Files
+- `.qodo.toml` - Main configuration
+- `.qodoignore` - Files to exclude from analysis
+- `QODO.md` - Complete usage guide
+
 ## Project Milestones
 
 This project is being built in 15 phases with 64 checkpoints. See [CELO.md](./CELO.md) for detailed implementation roadmap.
