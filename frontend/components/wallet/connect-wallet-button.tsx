@@ -1,7 +1,7 @@
 "use client";
 
 import { ConnectButton } from "thirdweb/react";
-import { client } from "@/config/thirdweb";
+import { client } from "@/lib/thirdweb-client";
 import { activeChain, CUSD_TOKEN_ADDRESS } from "@/lib/thirdweb";
 import { createWallet } from "thirdweb/wallets";
 

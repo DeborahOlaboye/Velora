@@ -1,36 +1,33 @@
 'use client'
 
-import { wagmiAdapter, projectId } from '@/config/wallet'
+import { wagmiAdapter, projectId, networks } from '@/config/wallet'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { createAppKit } from '@reown/appkit/react'
-import { mainnet, arbitrum } from '@reown/appkit/networks'
 import React, { type ReactNode } from 'react'
 import { WagmiProvider, type Config } from 'wagmi'
 
 // Set up queryClient
 const queryClient = new QueryClient()
 
-if (!projectId) {
-  throw new Error('Project ID is not defined')
-}
-
 // Set up metadata
 const metadata = {
   name: 'Velora',
-  description: 'Velora - Your App Description',
-  url: 'https://velora.vercel.app', // Update with your domain
-  icons: ['/logo.png'] // Update with your logo path
+  description: 'Mutual Aid for the Modern Worker - A decentralized platform for gig workers on Celo',
+  url: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+  icons: ['https://raw.githubusercontent.com/celo-org/celo-monorepo/master/packages/docs/static/img/celo-logo.png']
 }
 
 // Create the modal
 export const appKit = createAppKit({
   adapters: [wagmiAdapter],
   projectId,
-  networks: [mainnet, arbitrum],
-  defaultNetwork: mainnet,
+  networks: networks,
+  defaultNetwork: networks[0], // Celo Alfajores for development
   metadata: metadata,
   features: {
-    analytics: false // Set to true if you want to enable analytics
+    analytics: false,
+    email: false,
+    socials: []
   }
 })
 

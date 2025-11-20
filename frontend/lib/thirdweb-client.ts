@@ -7,25 +7,28 @@ import { defineChain } from "thirdweb/chains";
  * Configured for Celo network with gasless transaction support
  */
 
+// Get client ID from environment or use default for development
+const clientId = process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID || "2bb6ec5ab2beba542d1be1aa6c5c7661";
+
 // Create thirdweb client
 export const client = createThirdwebClient({
-  clientId: process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID!,
+  clientId,
 });
 
-// Define Celo Alfajores Testnet
-export const celoAlfajores = defineChain({
-  id: 44787,
-  name: "Celo Alfajores Testnet",
+// Define Celo Sepolia Testnet
+export const celoSepolia = defineChain({
+  id: 11142220,
+  name: "Celo Sepolia Testnet",
   nativeCurrency: {
     name: "CELO",
     symbol: "CELO",
     decimals: 18,
   },
-  rpc: "https://alfajores-forno.celo-testnet.org",
+  rpc: "https://rpc.ankr.com/celo_sepolia",
   blockExplorers: [
     {
       name: "CeloScan",
-      url: "https://alfajores.celoscan.io",
+      url: "https://sepolia.celoscan.io",
     },
   ],
   testnet: true,

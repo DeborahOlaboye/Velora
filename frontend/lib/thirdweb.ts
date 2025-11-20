@@ -2,7 +2,7 @@ import { defineChain } from "thirdweb";
 
 // Define Celo Sepolia testnet
 export const celoSepolia = defineChain({
-  id: 1740,
+  id: 11142220,
   name: "Celo Sepolia Testnet",
   nativeCurrency: {
     name: "CELO",
@@ -11,13 +11,13 @@ export const celoSepolia = defineChain({
   },
   rpcUrls: {
     default: {
-      http: [process.env.NEXT_PUBLIC_CELO_RPC_URL || "https://alfajores-forno.celo-testnet.org"],
+      http: [process.env.NEXT_PUBLIC_CELO_RPC_URL || "https://rpc.ankr.com/celo_sepolia"],
     },
   },
   blockExplorers: {
     default: {
       name: "CeloScan",
-      url: "https://celo-alfajores.blockscout.com",
+      url: "https://sepolia.celoscan.io",
     },
   },
   testnet: true,
