@@ -1,0 +1,98 @@
+# Qodo Ignore File for Velora
+# Files and directories to exclude from Qodo analysis
+
+# Dependencies
+node_modules/
+contract/lib/
+.pnp
+.pnp.js
+
+# Build outputs
+contract/out/
+contract/cache/
+contract/broadcast/
+.next/
+out/
+build/
+dist/
+
+# Testing
+coverage/
+.nyc_output/
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.env
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Git
+.git/
+.gitignore
+
+# Lock files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+foundry.lock
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# Compiled contracts (artifacts)
+artifacts/
+typechain/
+typechain-types/
+
+# Deployment artifacts
+deployments/
+
+# Documentation build
+docs/.vuepress/dist/
+docs/.vuepress/.cache/
+
+# Test artifacts
+.coverage_artifacts/
+.coverage_cache/
+
+# Foundry specific
+broadcast/
+cache_forge/
+
+# Frontend specific
+.turbo/
+.vercel/
+.swc/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Misc
+*.pid
+*.seed
+*.pid.lock
