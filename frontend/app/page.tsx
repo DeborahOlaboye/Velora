@@ -1,13 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { ConnectWalletButton } from "@/components/wallet/connect-wallet-button";
-import { useActiveAccount } from "thirdweb/react";
+import { ReownConnectButton } from "@/components/wallet/reown-connect-button";
+import { useAppKitAccount } from "@reown/appkit/react";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 
 export default function Home() {
-  const account = useActiveAccount();
+  const { isConnected } = useAppKitAccount();
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
@@ -24,8 +24,8 @@ export default function Home() {
             GoodDollar integration, and community-driven mutual aid.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <ConnectWalletButton />
-            {account && (
+            <ReownConnectButton />
+            {isConnected && (
               <>
                 <Link href="/dashboard">
                   <Button variant="outline" size="lg">
@@ -42,7 +42,7 @@ export default function Home() {
               </>
             )}
           </div>
-          {account && (
+          {isConnected && (
             <div className="flex flex-wrap justify-center gap-3 mt-4">
               <Link href="/contribute">
                 <Button size="sm" variant="ghost">Contribute</Button>

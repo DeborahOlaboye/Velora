@@ -55,7 +55,7 @@ export const celoMainnet = defineChain({
 
 // Export active chain based on environment
 export const activeChain =
-  process.env.NODE_ENV === "production" ? celoMainnet : celoAlfajores;
+  process.env.NODE_ENV === "production" ? celoMainnet : celoSepolia;
 
 // Contract addresses
 export const BENEFITS_POOL_ADDRESS =

@@ -55,7 +55,8 @@ const celoMainnet = defineChain({
   testnet: false,
 })
 
-export const networks = [celoSepolia, celoMainnet]
+// Only use Celo Sepolia testnet
+export const networks = [celoSepolia]
 
 // Set up the Wagmi Adapter (Config)
 export const wagmiAdapter = new WagmiAdapter({
@@ -71,7 +72,6 @@ export const wagmiAdapter = new WagmiAdapter({
   networks,
   transports: {
     [celoSepolia.id]: http('https://rpc.ankr.com/celo_sepolia'),
-    [celoMainnet.id]: http('https://forno.celo.org')
   }
 })
 

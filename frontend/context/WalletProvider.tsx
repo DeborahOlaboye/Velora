@@ -22,7 +22,7 @@ export const appKit = createAppKit({
   adapters: [wagmiAdapter],
   projectId,
   networks: networks,
-  defaultNetwork: networks[0], // Celo Alfajores for development
+  defaultNetwork: networks[0], // Celo Sepolia for development
   metadata: metadata,
   features: {
     analytics: false,
