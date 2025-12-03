@@ -25,7 +25,7 @@ export const selfBackendVerifier = new SelfBackendVerifier(
  * Verify a Self Protocol proof
  */
 export async function verifySelfProof(
-  proof: string,
+  proof: any, // VcAndDiscloseProof type from @selfxyz/core
   userId: string
 ): Promise<{
   verified: boolean;
@@ -33,17 +33,22 @@ export async function verifySelfProof(
   data?: any;
 }> {
   try {
-    const result = await selfBackendVerifier.verify(proof, userId);
+    // The verify method expects 4 parameters:
+    // 1. attestationId: 1 | 2 | 3
+    // 2. proof: VcAndDiscloseProof
+    // 3. pubSignals: BigNumberish[]
+    // 4. userContextData: string
+    const result = await selfBackendVerifier.verify(1, proof, [], '');
     
-    if (result.verified) {
+    if (result.isValidDetails.isValid) {
       return {
-        verified: true,
+        verified: result.isValidDetails.isValid,
         data: result,
       };
     } else {
       return {
         verified: false,
-        error: result.error || "Verification failed",
+        error: "Verification failed: " + JSON.stringify(result.isValidDetails),
       };
     }
   } catch (error) {

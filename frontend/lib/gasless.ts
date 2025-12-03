@@ -1,4 +1,4 @@
-import { getContract, prepareContractCall, sendTransaction, estimateGas as estimateGasThirdweb } from "thirdweb";
+import { getContract, prepareContractCall, sendTransaction, estimateGas as estimateGasThirdweb, readContract } from "thirdweb";
 import { Account } from "thirdweb/wallets";
 import { client, activeChain, BENEFITS_POOL_ADDRESS, CUSD_TOKEN_ADDRESS } from "./thirdweb-client";
 import { isGaslessEligible } from "./thirdweb-client";
