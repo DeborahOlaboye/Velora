@@ -49,7 +49,7 @@ export function SelfProtocolVerifier({
           minimumAge: minimumAge,
           nationality: requiredDisclosures.nationality,
           gender: requiredDisclosures.gender,
-          documentNumber: requiredDisclosures.documentNumber,
+          // documentNumber is not a valid property in SelfAppDisclosureConfig
         },
       }).build();
 
@@ -63,8 +63,8 @@ export function SelfProtocolVerifier({
     }
   }, [account?.address, minimumAge, requiredDisclosures]);
 
-  const handleVerificationSuccess = (result: any) => {
-    console.log("Verification successful:", result);
+  const handleVerificationSuccess = () => {
+    console.log("Verification successful");
     setVerificationStatus("verified");
     if (account?.address) {
       onVerificationComplete?.(true, account.address);
