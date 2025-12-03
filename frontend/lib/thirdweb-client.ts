@@ -24,13 +24,17 @@ export const celoSepolia = defineChain({
     symbol: "CELO",
     decimals: 18,
   },
-  rpc: "https://rpc.ankr.com/celo_sepolia",
-  blockExplorers: [
-    {
+  rpcUrls: {
+    default: {
+      http: ["https://rpc.ankr.com/celo_sepolia"],
+    },
+  },
+  blockExplorers: {
+    default: {
       name: "CeloScan",
       url: "https://sepolia.celoscan.io",
     },
-  ],
+  },
   testnet: true,
 });
 
@@ -43,19 +47,23 @@ export const celoMainnet = defineChain({
     symbol: "CELO",
     decimals: 18,
   },
-  rpc: "https://forno.celo.org",
-  blockExplorers: [
-    {
+  rpcUrls: {
+    default: {
+      http: ["https://forno.celo.org"],
+    },
+  },
+  blockExplorers: {
+    default: {
       name: "CeloScan",
       url: "https://celoscan.io",
     },
-  ],
+  },
   testnet: false,
 });
 
 // Export active chain based on environment
 export const activeChain =
-  process.env.NODE_ENV === "production" ? celoMainnet : celoAlfajores;
+  process.env.NODE_ENV === "production" ? celoMainnet : celoSepolia;
 
 // Contract addresses
 export const BENEFITS_POOL_ADDRESS =
