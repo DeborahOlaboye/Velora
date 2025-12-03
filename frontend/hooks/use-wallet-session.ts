@@ -16,11 +16,17 @@ export function useWalletSession(): WalletSession {
   const wallet = useActiveWallet();
   const { disconnect } = useDisconnect();
   const [isConnecting, setIsConnecting] = useState(false);
+  const [chainId, setChainId] = useState<number | undefined>(undefined);
 
-  // Track wallet connection state
+  // Track wallet connection state and chain ID
   useEffect(() => {
     if (wallet) {
       setIsConnecting(false);
+      // Get the chain from the wallet and extract the chain ID
+      const chain = wallet.getChain();
+      setChainId(chain ? Number(chain.id) : undefined);
+    } else {
+      setChainId(undefined);
     }
   }, [wallet]);
 
@@ -29,25 +35,28 @@ export function useWalletSession(): WalletSession {
     if (account?.address) {
       localStorage.setItem("wallet_session", JSON.stringify({
         address: account.address,
-        chainId: account.chainId,
+        chainId: chainId,
         timestamp: Date.now(),
       }));
     } else {
       localStorage.removeItem("wallet_session");
     }
-  }, [account]);
+  }, [account, chainId]);
 
   const handleDisconnect = () => {
-    disconnect(wallet);
-    localStorage.removeItem("wallet_session");
+    if (wallet) {
+      disconnect(wallet);
+      localStorage.removeItem("wallet_session");
+      setChainId(undefined);
+    }
   };
 
   return {
     address: account?.address,
     isConnected: !!account,
     isConnecting,
+    chainId: chainId,
     disconnect: handleDisconnect,
-    chainId: account?.chainId,
   };
 }
 
