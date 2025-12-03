@@ -162,11 +162,12 @@ export async function contributeToPool(
     const cusdContract = getCUSDContract();
     const poolContract = getBenefitsPoolContract();
 
-    // Check allowance
-    const allowance = await cusdContract.read.allowance([
-      account.address,
-      BENEFITS_POOL_ADDRESS,
-    ]);
+    // Check allowance using readContract
+    const allowance = await readContract({
+      contract: cusdContract,
+      method: "function allowance(address,address) view returns (uint256)",
+      params: [account.address, BENEFITS_POOL_ADDRESS]
+    });
 
     // Approve if needed
     let approvalTxHash: string | undefined;
