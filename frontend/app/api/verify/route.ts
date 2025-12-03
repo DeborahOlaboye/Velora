@@ -12,7 +12,7 @@ const selfBackendVerifier = new SelfBackendVerifier(
     excludedCountries: [], // Add excluded countries if needed
     ofac: true, // Enable OFAC sanctions screening
   }),
-  "wallet-address" // userId type
+  "hex" // userId type (wallet address in hex format)
 );
 
 export async function POST(request: NextRequest) {
@@ -28,9 +28,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify the proof from Self Protocol
-    const verificationResult = await selfBackendVerifier.verify(proof, userId);
+    const verificationResult = await selfBackendVerifier.verify(proof, userId, [], '');
 
-    if (verificationResult.verified) {
+    if (verificationResult.isValidDetails.isValid) {
       // Store verification status in your database here
       // Example:
       // await db.users.update({
@@ -43,6 +43,7 @@ export async function POST(request: NextRequest) {
         verified: true,
         message: "Identity verification successful",
         userId,
+        details: verificationResult.isValidDetails
       });
     } else {
       return NextResponse.json(
@@ -50,7 +51,8 @@ export async function POST(request: NextRequest) {
           success: false,
           verified: false,
           message: "Identity verification failed",
-          error: verificationResult.error,
+          error: "Verification details are not valid",
+          details: verificationResult.isValidDetails
         },
         { status: 400 }
       );
