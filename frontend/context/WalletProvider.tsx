@@ -21,7 +21,8 @@ const metadata = {
 export const appKit = createAppKit({
   adapters: [wagmiAdapter],
   projectId,
-  networks: networks,
+  // Ensure networks is a tuple with at least one element
+  networks: [networks[0], ...networks.slice(1)] as const,
   defaultNetwork: networks[0], // Celo Alfajores for development
   metadata: metadata,
   features: {
