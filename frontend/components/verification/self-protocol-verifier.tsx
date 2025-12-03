@@ -63,8 +63,8 @@ export function SelfProtocolVerifier({
     }
   }, [account?.address, minimumAge, requiredDisclosures]);
 
-  const handleVerificationSuccess = (result: any) => {
-    console.log("Verification successful:", result);
+  const handleVerificationSuccess = () => {
+    console.log("Verification successful");
     setVerificationStatus("verified");
     if (account?.address) {
       onVerificationComplete?.(true, account.address);
