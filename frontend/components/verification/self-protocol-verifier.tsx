@@ -49,7 +49,7 @@ export function SelfProtocolVerifier({
           minimumAge: minimumAge,
           nationality: requiredDisclosures.nationality,
           gender: requiredDisclosures.gender,
-          documentNumber: requiredDisclosures.documentNumber,
+          // documentNumber is not a valid property in SelfAppDisclosureConfig
         },
       }).build();
 
