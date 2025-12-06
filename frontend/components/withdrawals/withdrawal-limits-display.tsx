@@ -67,7 +67,7 @@ export function WithdrawalLimitsDisplay({
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <h3 className="text-lg font-semibold">Tier 1: Your Money</h3>
-                <Badge variant="success" className="bg-green-600">No Verification</Badge>
+                <Badge className="bg-green-600 text-white">No Verification</Badge>
               </div>
               <p className="text-sm text-gray-600">Access your own contributions</p>
             </div>
@@ -86,7 +86,7 @@ export function WithdrawalLimitsDisplay({
             <ul className="list-disc list-inside space-y-1 text-gray-700">
               <li>Request withdrawals up to {tier1Limit.toFixed(2)} cUSD</li>
               <li>No identity verification required</li>
-              <li>It's your money - fast access</li>
+              <li>It&apos;s your money - fast access</li>
             </ul>
           </div>
         </div>
@@ -102,7 +102,7 @@ export function WithdrawalLimitsDisplay({
               <div className="flex items-center gap-2 mb-1">
                 <h3 className="text-lg font-semibold">Tier 2: Community Assistance</h3>
                 {isVerified ? (
-                  <Badge variant="success" className="bg-blue-600">✓ Verified</Badge>
+                  <Badge className="bg-blue-600 text-white">✓ Verified</Badge>
                 ) : (
                   <Badge variant="outline">Verification Required</Badge>
                 )}
