@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { SelfProtocolVerifier } from "@/components/verification/self-protocol-verifier";
 import { useWorkerInfo } from "@/hooks/useWorkerInfo";
 import { CheckCircle2, Shield, AlertCircle, ArrowRight, Loader2 } from "lucide-react";
+import { Header } from "@/components/layout/header";
 import Link from "next/link";
 
 export default function VerifyPage() {
@@ -16,14 +17,25 @@ export default function VerifyPage() {
 
   if (!account) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4">
-        <div className="max-w-4xl mx-auto">
-          <Alert>
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
-              Please connect your wallet to verify your identity
-            </AlertDescription>
-          </Alert>
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <Card className="shadow-lg">
+            <CardHeader className="text-center">
+              <CardTitle>Connect Your Wallet</CardTitle>
+              <CardDescription>
+                Connect your wallet to verify your identity
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Alert className="bg-blue-50 border-blue-200">
+                <AlertCircle className="h-5 w-5 text-blue-600" />
+                <AlertDescription className="text-sm text-blue-800">
+                  You need to connect your wallet to access identity verification.
+                </AlertDescription>
+              </Alert>
+            </CardContent>
+          </Card>
         </div>
       </div>
     );
@@ -31,9 +43,10 @@ export default function VerifyPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4">
-        <div className="max-w-4xl mx-auto">
-          <Card>
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <Card className="shadow-lg">
             <CardContent className="flex justify-center items-center py-12">
               <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
             </CardContent>
@@ -45,15 +58,16 @@ export default function VerifyPage() {
 
   if (!workerInfo?.isRegistered) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4">
-        <div className="max-w-4xl mx-auto">
-          <Alert className="bg-yellow-50 border-yellow-200">
-            <AlertCircle className="h-4 w-4 text-yellow-600" />
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <Alert className="bg-yellow-50 border-yellow-200 shadow-lg">
+            <AlertCircle className="h-5 w-5 text-yellow-600" />
             <AlertDescription className="text-yellow-800">
-              <div className="flex justify-between items-center">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
                 <span>You must register as a worker before verifying your identity</span>
                 <Link href="/register">
-                  <Button size="sm">
+                  <Button size="sm" className="bg-yellow-600 hover:bg-yellow-700 whitespace-nowrap">
                     Register Now
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
@@ -68,14 +82,18 @@ export default function VerifyPage() {
 
   if (workerInfo.isVerified) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4">
-        <div className="max-w-4xl mx-auto space-y-6">
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-6">
           <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">
-              Identity Verification
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-green-600 to-emerald-700 mb-6">
+              <CheckCircle2 className="w-8 h-8 text-white" />
+            </div>
+            <h1 className="text-4xl font-bold text-gray-900 mb-4">
+              Identity Verified
             </h1>
-            <p className="text-lg text-gray-600">
-              Verify your identity to unlock higher withdrawal limits
+            <p className="text-xl text-gray-600">
+              You have full access to all Velora benefits
             </p>
           </div>
 
@@ -165,47 +183,51 @@ export default function VerifyPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4">
-      <div className="max-w-4xl mx-auto space-y-6">
+    <div className="min-h-screen bg-gray-50">
+      <Header />
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-6">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-purple-600 to-pink-700 mb-6">
+            <Shield className="w-8 h-8 text-white" />
+          </div>
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">
             Identity Verification
           </h1>
-          <p className="text-lg text-gray-600">
-            Verify your identity to unlock higher withdrawal limits
+          <p className="text-xl text-gray-600">
+            Unlock higher withdrawal limits and community voting rights
           </p>
         </div>
 
         {/* Benefits Card */}
-        <Card>
+        <Card className="shadow-lg">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Shield className="h-5 w-5" />
-              Why Verify?
+            <CardTitle className="text-2xl flex items-center gap-2">
+              <Shield className="h-6 w-6 text-purple-600" />
+              Why Verify Your Identity?
             </CardTitle>
-            <CardDescription>Benefits of completing identity verification</CardDescription>
+            <CardDescription className="text-base">Benefits of completing identity verification</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-green-50 p-4 rounded-lg">
-                <div className="flex items-center gap-2 mb-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-6 rounded-lg border border-green-200">
+                <div className="flex items-center gap-2 mb-3">
                   <Badge variant="default" className="bg-green-600">Tier 1</Badge>
-                  <span className="text-sm font-medium">Without Verification</span>
+                  <span className="text-sm font-medium text-gray-700">Without Verification</span>
                 </div>
-                <p className="text-2xl font-bold text-green-600 mb-1">
+                <p className="text-3xl font-bold text-green-600 mb-2">
                   100% Limit
                 </p>
                 <p className="text-sm text-gray-600">
-                  Withdraw up to 100% of your contributions (your money)
+                  Withdraw up to 100% of your contributions anytime
                 </p>
               </div>
 
-              <div className="bg-blue-50 p-4 rounded-lg border-2 border-blue-200">
-                <div className="flex items-center gap-2 mb-2">
+              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-lg border-2 border-blue-300 shadow-md">
+                <div className="flex items-center gap-2 mb-3">
                   <Badge variant="default" className="bg-blue-600">Tier 2</Badge>
-                  <span className="text-sm font-medium">With Verification</span>
+                  <span className="text-sm font-medium text-gray-700">With Verification</span>
                 </div>
-                <p className="text-2xl font-bold text-blue-600 mb-1">
+                <p className="text-3xl font-bold text-blue-600 mb-2">
                   200% Limit
                 </p>
                 <p className="text-sm text-gray-600">
@@ -214,10 +236,10 @@ export default function VerifyPage() {
               </div>
             </div>
 
-            <Alert className="mt-4 bg-blue-50 border-blue-200">
-              <AlertDescription className="text-sm text-blue-800">
-                <p className="font-semibold mb-1">💡 Verification is Optional</p>
-                <p>
+            <Alert className="mt-6 bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
+              <AlertDescription>
+                <p className="font-semibold text-purple-900 mb-2">Verification is Optional</p>
+                <p className="text-sm text-purple-800">
                   You can use Velora without verification, but verifying unlocks full benefits including voting rights and higher emergency fund access.
                 </p>
               </AlertDescription>
@@ -226,10 +248,10 @@ export default function VerifyPage() {
         </Card>
 
         {/* Verification Process */}
-        <Card>
+        <Card className="shadow-lg">
           <CardHeader>
-            <CardTitle>Verify with Self Protocol</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-2xl">Verify with Self Protocol</CardTitle>
+            <CardDescription className="text-base">
               Complete identity verification using Self Protocol's secure verification system
             </CardDescription>
           </CardHeader>
@@ -245,35 +267,35 @@ export default function VerifyPage() {
         </Card>
 
         {/* What Happens Next */}
-        <Card>
+        <Card className="shadow-lg">
           <CardHeader>
-            <CardTitle>What Happens After Verification?</CardTitle>
+            <CardTitle className="text-2xl">What Happens After Verification?</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3 text-sm text-gray-700">
-              <div className="flex items-start gap-2">
-                <div className="bg-blue-100 text-blue-600 rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <div className="space-y-4 text-sm text-gray-700">
+              <div className="flex items-start gap-3">
+                <div className="bg-purple-100 text-purple-600 rounded-full w-8 h-8 flex items-center justify-center flex-shrink-0 font-semibold">
                   1
                 </div>
-                <p>Your verification status is updated on-chain by the contract owner</p>
+                <p className="mt-1">Your verification status is updated on-chain by the contract owner</p>
               </div>
-              <div className="flex items-start gap-2">
-                <div className="bg-blue-100 text-blue-600 rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 mt-0.5">
+              <div className="flex items-start gap-3">
+                <div className="bg-purple-100 text-purple-600 rounded-full w-8 h-8 flex items-center justify-center flex-shrink-0 font-semibold">
                   2
                 </div>
-                <p>Your withdrawal limits automatically increase to 200% of contributions</p>
+                <p className="mt-1">Your withdrawal limits automatically increase to 200% of contributions</p>
               </div>
-              <div className="flex items-start gap-2">
-                <div className="bg-blue-100 text-blue-600 rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 mt-0.5">
+              <div className="flex items-start gap-3">
+                <div className="bg-purple-100 text-purple-600 rounded-full w-8 h-8 flex items-center justify-center flex-shrink-0 font-semibold">
                   3
                 </div>
-                <p>You gain voting rights on community withdrawal requests</p>
+                <p className="mt-1">You gain voting rights on community withdrawal requests</p>
               </div>
-              <div className="flex items-start gap-2">
-                <div className="bg-blue-100 text-blue-600 rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 mt-0.5">
+              <div className="flex items-start gap-3">
+                <div className="bg-purple-100 text-purple-600 rounded-full w-8 h-8 flex items-center justify-center flex-shrink-0 font-semibold">
                   4
                 </div>
-                <p>You can participate fully in the mutual aid network</p>
+                <p className="mt-1">You can participate fully in the mutual aid network</p>
               </div>
             </div>
           </CardContent>
