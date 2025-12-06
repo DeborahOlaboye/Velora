@@ -50,7 +50,7 @@ contract BenefitsPool is Ownable, ReentrancyGuard, Pausable {
     uint256 public votingPeriod = 7 days;
     uint256 public withdrawalCooldown = 90 days; // 3 months between withdrawals
     uint256 public votingThreshold = 60; // 60% approval needed
-    uint256 public maxWithdrawalPercentage = 50; // Max 50% of contributions
+    uint256 public maxWithdrawalPercentage = 50; // DEPRECATED - Using tiered system now (100% tier1, 200% tier2)
 
     // Events
     event WorkerRegistered(address indexed worker, uint256 timestamp);
@@ -142,8 +142,9 @@ contract BenefitsPool is Ownable, ReentrancyGuard, Pausable {
     /**
      * @dev Make a contribution to the pool
      * @param _amount Amount of cUSD to contribute
+     * @notice Verification is NOT required to contribute - only registration needed
      */
-    function contribute(uint256 _amount) external onlyRegistered onlyVerified whenNotPaused nonReentrant {
+    function contribute(uint256 _amount) external onlyRegistered whenNotPaused nonReentrant {
         require(_amount >= minimumContribution, "Below minimum contribution");
 
         // Transfer cUSD from worker to contract
@@ -157,14 +158,15 @@ contract BenefitsPool is Ownable, ReentrancyGuard, Pausable {
     }
 
     /**
-     * @dev Request an emergency withdrawal
+     * @dev Request an emergency withdrawal with tiered verification
      * @param _amount Amount requested
      * @param _reason Reason for the emergency
+     * @notice Tier 1 (≤100% contributions): No verification needed - it's your money
+     * @notice Tier 2 (>100% contributions): Verification required - accessing community funds
      */
     function requestWithdrawal(uint256 _amount, string calldata _reason)
         external
         onlyRegistered
-        onlyVerified
         whenNotPaused
         returns (uint256)
     {
@@ -173,6 +175,25 @@ contract BenefitsPool is Ownable, ReentrancyGuard, Pausable {
 
         Worker storage worker = workers[msg.sender];
 
+        // Tier 1: Withdrawing your own contributions (up to 100%)
+        // NO VERIFICATION NEEDED - it's your money
+        uint256 tier1Limit = worker.totalContributions;
+
+        // Tier 2: Community assistance (up to 200% of contributions)
+        // VERIFICATION REQUIRED - accessing community funds
+        uint256 tier2Limit = worker.totalContributions * 2;
+
+        // Check verification requirements based on withdrawal amount
+        if (_amount > tier1Limit) {
+            require(worker.isVerified, "Verification required to access community funds above your contributions");
+            require(_amount <= tier2Limit, "Exceeds maximum withdrawal (200% of contributions)");
+        } else {
+            require(_amount <= tier1Limit, "Amount exceeds your total contributions");
+        }
+
+        // Check pool has sufficient funds
+        require(_amount <= totalPoolBalance, "Insufficient pool balance");
+
         // Check cooldown period
         if (worker.lastWithdrawalTime > 0) {
             require(
@@ -180,11 +201,6 @@ contract BenefitsPool is Ownable, ReentrancyGuard, Pausable {
                 "Cooldown period active"
             );
         }
-
-        // Check withdrawal limit based on contributions
-        uint256 maxWithdrawal = (worker.totalContributions * maxWithdrawalPercentage) / 100;
-        require(_amount <= maxWithdrawal, "Exceeds withdrawal limit");
-        require(_amount <= totalPoolBalance, "Insufficient pool balance");
 
         uint256 requestId = withdrawalRequestCount++;
         WithdrawalRequest storage request = withdrawalRequests[requestId];
@@ -352,6 +368,28 @@ contract BenefitsPool is Ownable, ReentrancyGuard, Pausable {
         )
     {
         return (totalPoolBalance, totalWorkers, withdrawalRequestCount);
+    }
+
+    /**
+     * @dev Get withdrawal limits for a worker based on verification status
+     * @param _worker Address of the worker
+     * @return tier1Limit Maximum withdrawal without verification (100% of contributions)
+     * @return tier2Limit Maximum withdrawal with verification (200% of contributions)
+     * @return needsVerification Whether verification is required for tier 2
+     */
+    function getWithdrawalLimits(address _worker)
+        external
+        view
+        returns (
+            uint256 tier1Limit,
+            uint256 tier2Limit,
+            bool needsVerification
+        )
+    {
+        Worker storage worker = workers[_worker];
+        tier1Limit = worker.totalContributions;
+        tier2Limit = worker.totalContributions * 2;
+        needsVerification = !worker.isVerified;
     }
 
     /**
