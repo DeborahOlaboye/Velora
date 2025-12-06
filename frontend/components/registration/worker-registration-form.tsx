@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useActiveAccount } from "thirdweb/react";
+import { useActiveAccount, useSendTransaction } from "thirdweb/react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,6 +9,9 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { CheckCircle2, Loader2 } from "lucide-react";
+import { prepareContractCall } from "thirdweb";
+import { getBenefitsPoolContract } from "@/lib/contracts";
+import { useWorkerInfo } from "@/hooks/useWorkerInfo";
 
 interface WorkerData {
   gigWorkType: string;
@@ -45,9 +48,12 @@ const GIG_WORK_TYPES = [
 
 export function WorkerRegistrationForm() {
   const account = useActiveAccount();
+  const { mutateAsync: sendTransaction } = useSendTransaction();
+  const { workerInfo, refetch: refetchWorkerInfo } = useWorkerInfo(account?.address);
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const [workerData, setWorkerData] = useState<WorkerData>({
     gigWorkType: "",
     location: "",
@@ -70,19 +76,56 @@ export function WorkerRegistrationForm() {
   };
 
   const handleSubmit = async () => {
-    setIsSubmitting(true);
-    try {
-      // TODO: Submit to smart contract
-      // await registerWorker(account.address, workerData);
-      console.log("Registering worker:", { address: account?.address, ...workerData });
+    if (!account) {
+      setErrorMessage("Please connect your wallet");
+      return;
+    }
 
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
+    setIsSubmitting(true);
+    setErrorMessage("");
+
+    try {
+      // Check if already registered
+      if (workerInfo?.isRegistered) {
+        setErrorMessage("You are already registered");
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Prepare contract call to registerWorker()
+      const contract = getBenefitsPoolContract();
+      const transaction = prepareContractCall({
+        contract,
+        method: "function registerWorker()",
+        params: [],
+      });
+
+      // Send transaction
+      const result = await sendTransaction(transaction);
+      console.log("Registration transaction sent:", result);
+
+      // Save additional worker data to database
+      await fetch("/api/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          walletAddress: account.address,
+          gigWorkType: workerData.gigWorkType,
+          location: workerData.location,
+          yearsExperience: parseFloat(workerData.yearsExperience) || 0,
+          monthlyIncome: parseFloat(workerData.monthlyIncome) || 0,
+        }),
+      });
+
+      // Refetch worker info to update the UI
+      await refetchWorkerInfo();
 
       setRegistrationSuccess(true);
     } catch (error) {
       console.error("Registration failed:", error);
-      alert("Registration failed. Please try again.");
+      setErrorMessage(
+        error instanceof Error ? error.message : "Registration failed. Please try again."
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -372,6 +415,14 @@ export function WorkerRegistrationForm() {
                 including the withdrawal rules and community voting system.
               </Label>
             </div>
+
+            {errorMessage && (
+              <Alert className="bg-red-50 border-red-200">
+                <AlertDescription className="text-red-700">
+                  {errorMessage}
+                </AlertDescription>
+              </Alert>
+            )}
 
             <div className="flex justify-between pt-4">
               <Button variant="outline" onClick={handleBack}>
