@@ -25,7 +25,7 @@ export function useWorkerInfo(address?: string) {
   const { data, isLoading, error, refetch } = useReadContract({
     contract,
     method: "function getWorkerInfo(address _worker) view returns (bool isRegistered, bool isVerified, uint256 totalContributions, uint256 lastContributionTime, uint256 joinedAt, uint256 lastWithdrawalTime, uint256 withdrawalCount, string gigWorkType, string location, uint8 yearsExperience, uint256 monthlyIncome)",
-    params: address ? [address] : undefined,
+    params: address ? [address] : ["0x0000000000000000000000000000000000000000"],
   });
 
   if (!data || !address) {

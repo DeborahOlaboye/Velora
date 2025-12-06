@@ -16,7 +16,20 @@ contract BenefitsPoolTest is Test {
 
     uint256 constant INITIAL_BALANCE = 10000 * 10**18; // 10,000 cUSD
 
-    event WorkerRegistered(address indexed worker, uint256 timestamp);
+    event WorkerRegistered(
+        address indexed worker,
+        string gigWorkType,
+        string location,
+        uint8 yearsExperience,
+        uint256 monthlyIncome,
+        uint256 timestamp
+    );
+
+    // Helper function to register a worker with default test data
+    function registerWorker(address worker) internal {
+        vm.prank(worker);
+        pool.registerWorker("Ride-share Driver", "San Francisco, USA", 2, 2000);
+    }
     event WorkerVerified(address indexed worker, uint256 timestamp);
     event ContributionMade(address indexed worker, uint256 amount, uint256 timestamp);
     event WithdrawalRequested(
