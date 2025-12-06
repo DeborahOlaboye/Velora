@@ -146,35 +146,17 @@ export function WithdrawalRequestForm() {
       const result = await sendTransaction(transaction);
       console.log("Withdrawal request transaction sent:", result);
 
-      // Record in database
-      const response = await fetch("/api/withdrawals", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          walletAddress: account.address,
-          amount: withdrawalAmount,
-          reason,
-          urgencyLevel: urgency,
-          requestId: 0, // Will be updated from contract events
-          txHash: result.transactionHash,
-        }),
-      });
+      // Refetch worker info to update the UI
+      await refetchWorkerInfo();
+      await refetchLimits();
 
-      if (response.ok) {
-        // Refetch worker info to update the UI
-        await refetchWorkerInfo();
-        await refetchLimits();
-
-        setStatus("success");
-        setTimeout(() => {
-          setStatus("idle");
-          setAmount("");
-          setReason("");
-          setUrgency("MEDIUM");
-        }, 3000);
-      } else {
-        throw new Error("Failed to record withdrawal request in database");
-      }
+      setStatus("success");
+      setTimeout(() => {
+        setStatus("idle");
+        setAmount("");
+        setReason("");
+        setUrgency("MEDIUM");
+      }, 3000);
     } catch (error) {
       console.error("Withdrawal request failed:", error);
       setErrorMessage(
@@ -188,11 +170,21 @@ export function WithdrawalRequestForm() {
 
   if (!account) {
     return (
-      <Alert>
-        <AlertDescription>
-          Please connect your wallet to request emergency withdrawals
-        </AlertDescription>
-      </Alert>
+      <Card className="shadow-lg">
+        <CardHeader className="text-center">
+          <CardTitle>Connect Your Wallet</CardTitle>
+          <CardDescription>
+            Connect your wallet to request emergency withdrawals
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Alert className="bg-purple-50 border-purple-200">
+            <AlertDescription className="text-sm text-purple-800">
+              You need to connect your wallet and be registered to request withdrawals.
+            </AlertDescription>
+          </Alert>
+        </CardContent>
+      </Card>
     );
   }
 
@@ -206,17 +198,17 @@ export function WithdrawalRequestForm() {
         compact={false}
       />
 
-      <Card>
+      <Card className="shadow-lg">
         <CardHeader>
-          <CardTitle>Emergency Withdrawal Request</CardTitle>
-          <CardDescription>
-            Request emergency funds from the pool (requires community approval)
+          <CardTitle className="text-2xl">Request Emergency Withdrawal</CardTitle>
+          <CardDescription className="text-base">
+            Access your contributions or request community assistance
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-6">
 
         <div className="space-y-2">
-          <Label htmlFor="amount">Withdrawal Amount (cUSD)</Label>
+          <Label htmlFor="amount" className="text-sm font-medium">Withdrawal Amount (cUSD)</Label>
           <Input
             id="amount"
             type="number"
@@ -227,10 +219,11 @@ export function WithdrawalRequestForm() {
             onChange={(e) => setAmount(e.target.value)}
             disabled={isSubmitting}
             placeholder={`Max: ${currentMaxWithdrawal.toFixed(2)} cUSD`}
+            className="h-12 text-lg font-semibold"
           />
           <p className="text-sm text-gray-600">
-            Current limit: {currentMaxWithdrawal.toFixed(2)} cUSD
-            {!isVerified && ` (verify to unlock ${tier2Limit.toFixed(2)} cUSD)`}
+            Your limit: <strong>{currentMaxWithdrawal.toFixed(2)} cUSD</strong>
+            {!isVerified && ` • Verify to unlock ${tier2Limit.toFixed(2)} cUSD`}
           </p>
         </div>
 
@@ -266,9 +259,9 @@ export function WithdrawalRequestForm() {
         )}
 
         <div className="space-y-2">
-          <Label htmlFor="urgency">Urgency Level</Label>
+          <Label htmlFor="urgency" className="text-sm font-medium">Urgency Level</Label>
           <Select value={urgency} onValueChange={setUrgency} disabled={isSubmitting}>
-            <SelectTrigger>
+            <SelectTrigger className="h-11">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -280,7 +273,7 @@ export function WithdrawalRequestForm() {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="reason">Reason for Emergency Withdrawal</Label>
+          <Label htmlFor="reason" className="text-sm font-medium">Reason for Emergency Withdrawal</Label>
           <Textarea
             id="reason"
             rows={4}
@@ -288,34 +281,51 @@ export function WithdrawalRequestForm() {
             value={reason}
             onChange={(e) => setReason(e.target.value)}
             disabled={isSubmitting}
+            className="resize-none"
           />
           <p className="text-sm text-gray-600">
             Your fellow workers will review and vote on your request
           </p>
         </div>
 
-        <div className="bg-yellow-50 p-4 rounded-lg space-y-2">
-          <h4 className="font-semibold">Withdrawal Process</h4>
-          <ul className="text-sm space-y-1 text-gray-700">
-            <li>• Your request will be open for community voting (7 days)</li>
-            <li>• Requires 60% approval from verified workers</li>
-            <li>• Funds will be transferred automatically if approved</li>
-            <li>• 90-day cooldown between withdrawal requests</li>
+        <div className="bg-gradient-to-br from-yellow-50 to-orange-50 p-6 rounded-lg border border-yellow-200 space-y-3">
+          <h4 className="font-semibold text-yellow-900 flex items-center gap-2">
+            <Info className="h-5 w-5 text-yellow-600" />
+            Withdrawal Process
+          </h4>
+          <ul className="space-y-2 text-sm text-gray-700">
+            <li className="flex items-start gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-yellow-600 mt-1.5 flex-shrink-0" />
+              <span>Your request will be open for community voting (7 days)</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-yellow-600 mt-1.5 flex-shrink-0" />
+              <span>Requires 60% approval from verified workers</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-yellow-600 mt-1.5 flex-shrink-0" />
+              <span>Funds transferred automatically if approved</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-yellow-600 mt-1.5 flex-shrink-0" />
+              <span>90-day cooldown between withdrawal requests</span>
+            </li>
           </ul>
         </div>
 
         {status === "success" && (
-          <Alert className="bg-green-50 border-green-200">
-            <CheckCircle2 className="h-4 w-4 text-green-600" />
-            <AlertDescription className="text-green-700">
-              Request submitted! The community will vote on your request.
+          <Alert className="bg-gradient-to-r from-green-50 to-emerald-50 border-green-200">
+            <CheckCircle2 className="h-5 w-5 text-green-600" />
+            <AlertDescription className="text-green-700 font-medium">
+              Request submitted successfully! The community will vote on your request.
             </AlertDescription>
           </Alert>
         )}
 
         {status === "error" && (
           <Alert className="bg-red-50 border-red-200">
-            <AlertDescription className="text-red-700">
+            <AlertCircle className="h-5 w-5 text-red-600" />
+            <AlertDescription className="text-red-700 font-medium">
               {errorMessage}
             </AlertDescription>
           </Alert>
@@ -330,13 +340,13 @@ export function WithdrawalRequestForm() {
             parseFloat(amount) > currentMaxWithdrawal ||
             parseFloat(amount) <= 0
           }
-          className="w-full"
+          className="w-full bg-purple-600 hover:bg-purple-700"
           size="lg"
         >
           {isSubmitting ? (
             <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Submitting Request...
+              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+              Submitting to Blockchain...
             </>
           ) : (
             "Submit Emergency Withdrawal Request"

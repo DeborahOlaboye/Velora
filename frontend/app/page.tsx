@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ConnectWalletButton } from "@/components/wallet/connect-wallet-button";
 import { useActiveAccount } from "thirdweb/react";
 import { Button } from "@/components/ui/button";
+import { Header } from "@/components/layout/header";
 import {
   ArrowRight,
   Shield,
@@ -20,6 +21,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-white">
+      <Header />
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 text-white">
         <div className="absolute inset-0 bg-grid-white/[0.05] bg-[size:20px_20px]" />
@@ -42,18 +44,23 @@ export default function Home() {
             {/* CTA */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
               {!account ? (
-                <ConnectWalletButton />
+                <div className="flex flex-col items-center gap-4">
+                  <ConnectWalletButton />
+                  <p className="text-sm text-blue-200">
+                    Connect your wallet to get started
+                  </p>
+                </div>
               ) : (
                 <>
-                  <Link href="/register">
+                  <Link href="/dashboard">
                     <Button size="lg" className="bg-white text-blue-600 hover:bg-blue-50 px-8 py-6 text-lg font-semibold shadow-xl">
-                      Get Started
+                      Open Dashboard
                       <ArrowRight className="ml-2 h-5 w-5" />
                     </Button>
                   </Link>
-                  <Link href="/dashboard">
+                  <Link href="/register">
                     <Button size="lg" variant="outline" className="border-white/30 text-white hover:bg-white/10 px-8 py-6 text-lg">
-                      Go to Dashboard
+                      Register as Worker
                     </Button>
                   </Link>
                 </>
@@ -250,18 +257,23 @@ export default function Home() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             {!account ? (
-              <ConnectWalletButton />
+              <div className="flex flex-col items-center gap-4">
+                <ConnectWalletButton />
+                <p className="text-sm text-blue-200">
+                  Connect your wallet to access all features
+                </p>
+              </div>
             ) : (
               <>
-                <Link href="/register">
+                <Link href="/dashboard">
                   <Button size="lg" className="bg-white text-blue-600 hover:bg-blue-50 px-8 py-6 text-lg font-semibold">
-                    Get Started Now
+                    Open Dashboard
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
                 </Link>
-                <Link href="/dashboard">
+                <Link href="/register">
                   <Button size="lg" variant="outline" className="border-white/30 text-white hover:bg-white/10 px-8 py-6 text-lg">
-                    View Dashboard
+                    Register as Worker
                   </Button>
                 </Link>
               </>

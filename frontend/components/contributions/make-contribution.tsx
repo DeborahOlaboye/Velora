@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, CheckCircle2, XCircle } from "lucide-react";
+import { Loader2, CheckCircle2, XCircle, AlertCircle } from "lucide-react";
 import { prepareContractCall } from "thirdweb";
 import { getBenefitsPoolContract } from "@/lib/contracts";
 import { useCUSDBalance } from "@/hooks/useCUSDBalance";
@@ -35,11 +35,27 @@ export function MakeContribution() {
       return;
     }
 
+    const contributionAmount = parseFloat(amount);
+    if (contributionAmount < 5) {
+      setErrorMessage("Minimum contribution is 5 cUSD");
+      setStatus("error");
+      return;
+    }
+
+    const amountInWei = parseTokenAmount(amount);
+
+    // Check balance before approval
+    if (cUSDBalance && amountInWei > cUSDBalance) {
+      setErrorMessage(`Insufficient cUSD balance. You have ${formatTokenAmount(cUSDBalance)} cUSD but trying to contribute ${amount} cUSD`);
+      setStatus("error");
+      return;
+    }
+
     setIsApproving(true);
     setStatus("idle");
+    setErrorMessage("");
 
     try {
-      const amountInWei = parseTokenAmount(amount);
       const approveTransaction = prepareApproveTransaction(amountInWei);
 
       await sendTransaction(approveTransaction);
@@ -48,10 +64,11 @@ export function MakeContribution() {
       await refetchAllowance();
 
       setCurrentStep("contribute");
+      setStatus("idle");
     } catch (error) {
       console.error("Approval failed:", error);
       setErrorMessage(
-        error instanceof Error ? error.message : "Approval failed"
+        error instanceof Error ? error.message : "Approval failed. Please try again."
       );
       setStatus("error");
     } finally {
@@ -113,19 +130,6 @@ export function MakeContribution() {
       const result = await sendTransaction(transaction);
       console.log("Contribution transaction sent:", result);
 
-      // Record in database
-      await fetch("/api/contributions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          walletAddress: account.address,
-          amount: contributionAmount,
-          txHash: result.transactionHash,
-          blockNumber: 0, // Will be updated by backend
-          contributionType: "MONTHLY",
-        }),
-      });
-
       // Refetch balances and worker info
       await Promise.all([refetchBalance(), refetchAllowance(), refetchWorkerInfo()]);
 
@@ -147,25 +151,36 @@ export function MakeContribution() {
 
   if (!account) {
     return (
-      <Alert>
-        <AlertDescription>
-          Please connect your wallet to make contributions
-        </AlertDescription>
-      </Alert>
+      <Card className="shadow-lg">
+        <CardHeader className="text-center">
+          <CardTitle>Connect Your Wallet</CardTitle>
+          <CardDescription>
+            Connect your wallet to make contributions to the pool
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Alert className="bg-blue-50 border-blue-200">
+            <AlertDescription className="text-sm text-blue-800">
+              You need to connect your wallet and be registered to make contributions.
+            </AlertDescription>
+          </Alert>
+        </CardContent>
+      </Card>
     );
   }
 
   return (
-    <Card>
+    <Card className="shadow-lg">
       <CardHeader>
-        <CardTitle>Make a Contribution</CardTitle>
-        <CardDescription>
-          Contribute to the mutual aid pool (minimum 5 cUSD)
+        <CardTitle className="text-2xl">Contribution Details</CardTitle>
+        <CardDescription className="text-base">
+          Contribute to build your emergency fund (minimum 5 cUSD)
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-6">
+        {/* Amount Input */}
         <div className="space-y-2">
-          <Label htmlFor="amount">Contribution Amount (cUSD)</Label>
+          <Label htmlFor="amount" className="text-sm font-medium">Contribution Amount (cUSD)</Label>
           <Input
             id="amount"
             type="number"
@@ -174,75 +189,138 @@ export function MakeContribution() {
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
             disabled={isSubmitting || isApproving}
+            className="h-12 text-lg font-semibold"
           />
-          <div className="flex justify-between text-sm text-gray-600">
-            <span>Your contribution helps build emergency funds for all workers</span>
+          <div className="flex justify-between text-sm">
+            <span className="text-gray-600">Minimum: 5 cUSD</span>
             {cUSDBalance !== undefined && (
-              <span>Balance: {formatTokenAmount(cUSDBalance)} cUSD</span>
+              <span className={`font-medium ${
+                cUSDBalance === 0n ? 'text-red-600' :
+                parseFloat(amount) > 0 && parseTokenAmount(amount) > cUSDBalance ? 'text-red-600' :
+                'text-blue-600'
+              }`}>
+                Balance: {formatTokenAmount(cUSDBalance)} cUSD
+              </span>
             )}
           </div>
         </div>
 
-        <div className="bg-blue-50 p-4 rounded-lg space-y-2">
-          <h4 className="font-semibold">Contribution Benefits</h4>
-          <ul className="text-sm space-y-1 text-gray-700">
-            <li>• Tier 1: Withdraw up to 100% of your contributions (no verification)</li>
-            <li>• Tier 2: Withdraw up to 200% with verification (community assistance)</li>
-            <li>• Voting rights on withdrawal requests</li>
-            <li>• Build a safety net with fellow gig workers</li>
-          </ul>
-          <p className="text-xs text-gray-600 mt-2 italic">
-            💡 No verification needed to contribute or withdraw your own funds!
-          </p>
-        </div>
-
-        {status === "success" && (
-          <Alert className="bg-green-50 border-green-200">
-            <CheckCircle2 className="h-4 w-4 text-green-600" />
-            <AlertDescription className="text-green-700">
-              Contribution successful! Thank you for supporting the pool.
+        {/* Insufficient Balance Warning */}
+        {cUSDBalance !== undefined && parseFloat(amount) > 0 && parseTokenAmount(amount) > cUSDBalance && (
+          <Alert className="bg-red-50 border-red-200">
+            <AlertCircle className="h-5 w-5 text-red-600" />
+            <AlertDescription className="text-red-700 font-medium">
+              Insufficient cUSD balance! You have {formatTokenAmount(cUSDBalance)} cUSD but trying to contribute {amount} cUSD.
+              {cUSDBalance === 0n && (
+                <p className="mt-2 text-sm">
+                  You need to get some cUSD tokens first. You can swap other tokens for cUSD on a DEX like Ubeswap.
+                </p>
+              )}
             </AlertDescription>
           </Alert>
         )}
 
+        {/* Zero Balance Warning */}
+        {cUSDBalance === 0n && (
+          <Alert className="bg-yellow-50 border-yellow-200">
+            <AlertCircle className="h-5 w-5 text-yellow-600" />
+            <AlertDescription className="text-yellow-800">
+              <p className="font-semibold mb-1">No cUSD Balance Detected</p>
+              <p className="text-sm">
+                You need cUSD tokens to contribute. Get cUSD from:
+              </p>
+              <ul className="text-sm mt-2 space-y-1 ml-4 list-disc">
+                <li>Swap tokens on <a href="https://app.ubeswap.org" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Ubeswap</a></li>
+                <li>Bridge from other chains using <a href="https://www.portalbridge.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Portal Bridge</a></li>
+                <li>Buy directly on an exchange and withdraw to Celo</li>
+              </ul>
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {/* Benefits Info */}
+        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-lg border border-blue-100 space-y-3">
+          <h4 className="font-semibold text-blue-900 flex items-center gap-2">
+            <CheckCircle2 className="h-5 w-5 text-blue-600" />
+            What You Get
+          </h4>
+          <ul className="space-y-2 text-sm text-gray-700">
+            <li className="flex items-start gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-blue-600 mt-1.5 flex-shrink-0" />
+              <span><strong>Tier 1 Access:</strong> Withdraw up to 100% of contributions anytime (no verification)</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-blue-600 mt-1.5 flex-shrink-0" />
+              <span><strong>Tier 2 Access:</strong> Withdraw up to 200% with verification (community support)</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-blue-600 mt-1.5 flex-shrink-0" />
+              <span>Voting rights on all withdrawal requests</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-blue-600 mt-1.5 flex-shrink-0" />
+              <span>Help build a safety net for fellow gig workers</span>
+            </li>
+          </ul>
+        </div>
+
+        {/* Success Message */}
+        {status === "success" && (
+          <Alert className="bg-gradient-to-r from-green-50 to-emerald-50 border-green-200">
+            <CheckCircle2 className="h-5 w-5 text-green-600" />
+            <AlertDescription className="text-green-700 font-medium">
+              Contribution successful! Your emergency fund has been updated.
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {/* Error Message */}
         {status === "error" && (
           <Alert className="bg-red-50 border-red-200">
-            <XCircle className="h-4 w-4 text-red-600" />
-            <AlertDescription className="text-red-700">
+            <XCircle className="h-5 w-5 text-red-600" />
+            <AlertDescription className="text-red-700 font-medium">
               {errorMessage}
             </AlertDescription>
           </Alert>
         )}
 
+        {/* Action Buttons */}
         {currentStep === "approve" && (
-          <Button
-            onClick={handleApprove}
-            disabled={isApproving || parseFloat(amount) < 5}
-            className="w-full"
-            size="lg"
-          >
-            {isApproving ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Approving...
-              </>
-            ) : (
-              `Approve ${amount} cUSD`
-            )}
-          </Button>
+          <div className="space-y-3">
+            <Alert className="bg-yellow-50 border-yellow-200">
+              <AlertDescription className="text-sm text-yellow-800">
+                <strong>Step 1 of 2:</strong> You need to approve the cUSD spending limit before contributing.
+              </AlertDescription>
+            </Alert>
+            <Button
+              onClick={handleApprove}
+              disabled={isApproving || parseFloat(amount) < 5}
+              className="w-full bg-yellow-600 hover:bg-yellow-700"
+              size="lg"
+            >
+              {isApproving ? (
+                <>
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  Approving cUSD...
+                </>
+              ) : (
+                `Approve ${amount} cUSD Spending`
+              )}
+            </Button>
+          </div>
         )}
 
         {currentStep === "contribute" && (
           <Button
             onClick={handleContribute}
             disabled={isSubmitting || parseFloat(amount) < 5}
-            className="w-full"
+            className="w-full bg-blue-600 hover:bg-blue-700"
             size="lg"
           >
             {isSubmitting ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Processing...
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                Processing Contribution...
               </>
             ) : (
               `Contribute ${amount} cUSD`
