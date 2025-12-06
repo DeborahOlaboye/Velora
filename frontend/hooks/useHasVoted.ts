@@ -12,7 +12,7 @@ export function useHasVoted(requestId?: number, address?: string) {
   const { data, isLoading, error, refetch } = useReadContract({
     contract,
     method: "function hasVoted(uint256 _requestId, address _voter) view returns (bool)",
-    params: requestId !== undefined && address ? [BigInt(requestId), address] : undefined,
+    params: requestId !== undefined && address ? [BigInt(requestId), address] : [BigInt(0), "0x0000000000000000000000000000000000000000"],
   });
 
   return {

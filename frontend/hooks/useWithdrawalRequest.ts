@@ -22,7 +22,7 @@ export function useWithdrawalRequest(requestId?: number) {
   const { data, isLoading, error, refetch } = useReadContract({
     contract,
     method: "function getWithdrawalRequest(uint256 _requestId) view returns (address worker, uint256 amount, string reason, uint256 createdAt, uint256 votesFor, uint256 votesAgainst, bool executed, bool approved)",
-    params: requestId !== undefined ? [BigInt(requestId)] : undefined,
+    params: requestId !== undefined ? [BigInt(requestId)] : [BigInt(0)],
   });
 
   if (!data || requestId === undefined) {

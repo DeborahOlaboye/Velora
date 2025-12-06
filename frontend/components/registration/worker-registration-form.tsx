@@ -216,7 +216,7 @@ export function WorkerRegistrationForm() {
         <CardContent>
           <Alert className="bg-blue-50 border-blue-200">
             <AlertDescription className="text-sm text-blue-800">
-              You'll need a Web3 wallet (like MetaMask) to register and participate in the benefits pool.
+              You&apos;ll need a Web3 wallet (like MetaMask) to register and participate in the benefits pool.
             </AlertDescription>
           </Alert>
         </CardContent>
@@ -377,7 +377,7 @@ export function WorkerRegistrationForm() {
           <CardHeader>
             <CardTitle className="text-2xl">Initial Contribution</CardTitle>
             <CardDescription className="text-base">
-              This is just for planning - you'll make your first contribution from your dashboard
+              This is just for planning - you&apos;ll make your first contribution from your dashboard
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">

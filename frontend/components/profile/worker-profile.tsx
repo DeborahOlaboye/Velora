@@ -190,7 +190,7 @@ export function WorkerProfile() {
           {!lastContributionDate && (
             <Alert className="mt-4 bg-yellow-50 border-yellow-200">
               <AlertDescription className="text-sm text-yellow-800">
-                You haven't made any contributions yet. Start contributing to build your emergency fund!
+                You haven&apos;t made any contributions yet. Start contributing to build your emergency fund!
               </AlertDescription>
             </Alert>
           )}

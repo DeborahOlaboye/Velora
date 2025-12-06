@@ -11,7 +11,7 @@ export function getBenefitsPoolContract() {
     client,
     chain: activeChain,
     address: BENEFITS_POOL_ADDRESS,
-    abi: BenefitsPoolABI,
+    abi: BenefitsPoolABI as any,
   });
 }
 
@@ -23,7 +23,7 @@ export function getCUSDContract() {
     client,
     chain: activeChain,
     address: CUSD_TOKEN_ADDRESS,
-    abi: ERC20ABI,
+    abi: ERC20ABI as any,
   });
 }
 
