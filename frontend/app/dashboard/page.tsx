@@ -2,17 +2,24 @@
 
 import { useState } from "react";
 import { useActiveAccount } from "thirdweb/react";
+import { useRouter } from "next/navigation";
 import { WorkerProfile } from "@/components/profile/worker-profile";
 import { ClaimWidget } from "@/components/gooddollar/claim-widget";
 import { SelfProtocolVerifier } from "@/components/verification/self-protocol-verifier";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ConnectWalletButton } from "@/components/wallet/connect-wallet-button";
+import { TrendingUp, CheckCircle2 } from "lucide-react";
 
 export default function DashboardPage() {
   const account = useActiveAccount();
+  const router = useRouter();
   const [isVerified, setIsVerified] = useState(false);
+
+  // Mock data - TODO: Replace with actual data from smart contract
+  const totalContributions = 120.5; // TODO: Fetch from contract using getWorkerInfo()
 
   if (!account) {
     return (
@@ -41,6 +48,64 @@ export default function DashboardPage() {
             Manage your participation in the Gig Worker Benefits Pool
           </p>
         </div>
+
+        {/* Optional Verification Banner - Only show for unverified users with contributions */}
+        {!isVerified && totalContributions > 0 && (
+          <Alert className="bg-blue-50 border-blue-200 mb-6">
+            <TrendingUp className="h-5 w-5 text-blue-600" />
+            <AlertDescription>
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div className="flex-1">
+                  <p className="font-semibold text-blue-900 mb-1">
+                    💡 Optional: Unlock Higher Withdrawal Limits
+                  </p>
+                  <p className="text-sm text-blue-800 mb-2">
+                    Verify your identity to access community assistance funds during emergencies
+                  </p>
+                  <div className="text-sm space-y-1">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-green-600" />
+                      <span className="text-gray-700">
+                        Current limit: <strong>{totalContributions.toFixed(2)} cUSD</strong> (no verification needed)
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 text-gray-600">
+                      <span className="ml-6">
+                        Unlock up to: <strong>{(totalContributions * 2).toFixed(2)} cUSD</strong> with verification
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <Button
+                  onClick={() => router.push('/verify')}
+                  className="bg-blue-600 hover:bg-blue-700 whitespace-nowrap"
+                  size="lg"
+                >
+                  Verify Identity
+                </Button>
+              </div>
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {/* Success banner for verified users */}
+        {isVerified && (
+          <Alert className="bg-green-50 border-green-200 mb-6">
+            <CheckCircle2 className="h-5 w-5 text-green-600" />
+            <AlertDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-semibold text-green-900 mb-1">
+                    ✓ Identity Verified
+                  </p>
+                  <p className="text-sm text-green-800">
+                    You have access to Tier 2 withdrawal limits (up to {(totalContributions * 2).toFixed(2)} cUSD)
+                  </p>
+                </div>
+              </div>
+            </AlertDescription>
+          </Alert>
+        )}
 
         <Tabs defaultValue="profile" className="space-y-6">
           <TabsList className="grid w-full grid-cols-3 lg:w-auto">

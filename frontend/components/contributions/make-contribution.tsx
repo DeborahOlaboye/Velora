@@ -116,11 +116,14 @@ export function MakeContribution() {
         <div className="bg-blue-50 p-4 rounded-lg space-y-2">
           <h4 className="font-semibold">Contribution Benefits</h4>
           <ul className="text-sm space-y-1 text-gray-700">
-            <li>• Eligible for emergency withdrawals (up to 50% of contributions)</li>
+            <li>• Tier 1: Withdraw up to 100% of your contributions (no verification)</li>
+            <li>• Tier 2: Withdraw up to 200% with verification (community assistance)</li>
             <li>• Voting rights on withdrawal requests</li>
             <li>• Build a safety net with fellow gig workers</li>
-            <li>• Gas-less transactions with thirdweb</li>
           </ul>
+          <p className="text-xs text-gray-600 mt-2 italic">
+            💡 No verification needed to contribute or withdraw your own funds!
+          </p>
         </div>
 
         {status === "success" && (
