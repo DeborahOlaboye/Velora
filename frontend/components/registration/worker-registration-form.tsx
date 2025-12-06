@@ -109,24 +109,7 @@ export function WorkerRegistrationForm() {
       const result = await sendTransaction(transaction);
       console.log("Registration transaction sent:", result);
 
-      // Optionally save to database for quick access (data is also on-chain)
-      try {
-        await fetch("/api/users", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            walletAddress: account.address,
-            gigWorkType: workerData.gigWorkType,
-            location: workerData.location,
-            yearsExperience: parseFloat(workerData.yearsExperience) || 0,
-            monthlyIncome: parseFloat(workerData.monthlyIncome) || 0,
-          }),
-        });
-      } catch (dbError) {
-        console.warn("Database save failed, but on-chain registration succeeded:", dbError);
-      }
-
-      // Refetch worker info to update the UI
+      // Refetch worker info to update the UI with on-chain data
       await refetchWorkerInfo();
 
       setRegistrationSuccess(true);
