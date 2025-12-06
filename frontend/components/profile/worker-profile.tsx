@@ -1,53 +1,19 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { useActiveAccount } from "thirdweb/react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, Edit, Save, X, Loader2, Shield, DollarSign, TrendingUp } from "lucide-react";
+import { CheckCircle2, Loader2, Shield, DollarSign, TrendingUp } from "lucide-react";
 import { useWorkerInfo } from "@/hooks/useWorkerInfo";
 import { useWithdrawalLimits } from "@/hooks/useWithdrawalLimits";
 import { formatTokenAmount } from "@/lib/token-utils";
 
-interface EditableProfileData {
-  gigWorkType: string;
-  location: string;
-  yearsExperience: number;
-}
-
 export function WorkerProfile() {
   const account = useActiveAccount();
-  const { workerInfo, isLoading, refetch } = useWorkerInfo(account?.address);
+  const { workerInfo, isLoading } = useWorkerInfo(account?.address);
   const { limits } = useWithdrawalLimits(account?.address);
-  const [isEditing, setIsEditing] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [editData, setEditData] = useState<EditableProfileData>({
-    gigWorkType: "",
-    location: "",
-    yearsExperience: 0,
-  });
-
-  // Fetch user data from database
-  useEffect(() => {
-    if (account?.address) {
-      fetch(`/api/users?address=${account.address}`)
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.user) {
-            setEditData({
-              gigWorkType: data.user.gigWorkType || "",
-              location: data.user.location || "",
-              yearsExperience: data.user.yearsExperience || 0,
-            });
-          }
-        })
-        .catch((error) => console.error("Error fetching user data:", error));
-    }
-  }, [account?.address]);
 
   if (!account) {
     return (
@@ -78,26 +44,6 @@ export function WorkerProfile() {
       </Alert>
     );
   }
-
-  const handleSave = async () => {
-    setIsSaving(true);
-    try {
-      await fetch("/api/users", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          walletAddress: account.address,
-          ...editData,
-        }),
-      });
-      setIsEditing(false);
-    } catch (error) {
-      console.error("Error saving profile:", error);
-      alert("Failed to save profile. Please try again.");
-    } finally {
-      setIsSaving(false);
-    }
-  };
 
   const totalContributions = workerInfo.totalContributions
     ? formatTokenAmount(workerInfo.totalContributions)
@@ -132,35 +78,9 @@ export function WorkerProfile() {
                 )}
               </CardTitle>
               <CardDescription>
-                View and manage your worker profile information
+                Your worker profile information (stored on-chain)
               </CardDescription>
             </div>
-            {!isEditing ? (
-              <Button onClick={() => setIsEditing(true)} size="sm" variant="outline">
-                <Edit className="h-4 w-4 mr-2" />
-                Edit
-              </Button>
-            ) : (
-              <div className="flex gap-2">
-                <Button onClick={handleSave} size="sm" disabled={isSaving}>
-                  {isSaving ? (
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  ) : (
-                    <Save className="h-4 w-4 mr-2" />
-                  )}
-                  Save
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => setIsEditing(false)}
-                  size="sm"
-                  disabled={isSaving}
-                >
-                  <X className="h-4 w-4 mr-2" />
-                  Cancel
-                </Button>
-              </div>
-            )}
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -180,52 +100,23 @@ export function WorkerProfile() {
             </div>
 
             <div>
-              <Label htmlFor="gigWorkType" className="text-sm text-gray-600">Gig Work Type</Label>
-              {isEditing ? (
-                <Input
-                  id="gigWorkType"
-                  value={editData.gigWorkType}
-                  onChange={(e) =>
-                    setEditData({ ...editData, gigWorkType: e.target.value })
-                  }
-                  className="mt-1"
-                />
-              ) : (
-                <p className="text-sm mt-1 p-2">{editData.gigWorkType || "Not specified"}</p>
-              )}
+              <Label className="text-sm text-gray-600">Gig Work Type</Label>
+              <p className="text-sm mt-1 p-2">{workerInfo.gigWorkType || "Not specified"}</p>
             </div>
 
             <div>
-              <Label htmlFor="location" className="text-sm text-gray-600">Location</Label>
-              {isEditing ? (
-                <Input
-                  id="location"
-                  value={editData.location}
-                  onChange={(e) =>
-                    setEditData({ ...editData, location: e.target.value })
-                  }
-                  className="mt-1"
-                />
-              ) : (
-                <p className="text-sm mt-1 p-2">{editData.location || "Not specified"}</p>
-              )}
+              <Label className="text-sm text-gray-600">Location</Label>
+              <p className="text-sm mt-1 p-2">{workerInfo.location || "Not specified"}</p>
             </div>
 
             <div>
-              <Label htmlFor="experience" className="text-sm text-gray-600">Years of Experience</Label>
-              {isEditing ? (
-                <Input
-                  id="experience"
-                  type="number"
-                  value={editData.yearsExperience}
-                  onChange={(e) =>
-                    setEditData({ ...editData, yearsExperience: parseInt(e.target.value) || 0 })
-                  }
-                  className="mt-1"
-                />
-              ) : (
-                <p className="text-sm mt-1 p-2">{editData.yearsExperience || 0} years</p>
-              )}
+              <Label className="text-sm text-gray-600">Years of Experience</Label>
+              <p className="text-sm mt-1 p-2">{workerInfo.yearsExperience || 0} years</p>
+            </div>
+
+            <div>
+              <Label className="text-sm text-gray-600">Monthly Income</Label>
+              <p className="text-sm mt-1 p-2">${workerInfo.monthlyIncome ? Number(workerInfo.monthlyIncome).toLocaleString() : "0"} USD</p>
             </div>
 
             <div>
