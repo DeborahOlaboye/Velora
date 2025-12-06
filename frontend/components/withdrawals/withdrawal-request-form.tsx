@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useActiveAccount } from "thirdweb/react";
+import { useActiveAccount, useSendTransaction } from "thirdweb/react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,10 +12,18 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, CheckCircle2, AlertCircle, AlertTriangle, Info } from "lucide-react";
 import { WithdrawalLimitsDisplay } from "./withdrawal-limits-display";
 import { useRouter } from "next/navigation";
+import { prepareContractCall } from "thirdweb";
+import { getBenefitsPoolContract } from "@/lib/contracts";
+import { useWorkerInfo } from "@/hooks/useWorkerInfo";
+import { useWithdrawalLimits } from "@/hooks/useWithdrawalLimits";
+import { parseTokenAmount, formatTokenAmount } from "@/lib/token-utils";
 
 export function WithdrawalRequestForm() {
   const account = useActiveAccount();
   const router = useRouter();
+  const { mutateAsync: sendTransaction } = useSendTransaction();
+  const { workerInfo, refetch: refetchWorkerInfo } = useWorkerInfo(account?.address);
+  const { limits, refetch: refetchLimits } = useWithdrawalLimits(account?.address);
   const [amount, setAmount] = useState("");
   const [reason, setReason] = useState("");
   const [urgency, setUrgency] = useState("MEDIUM");
@@ -23,13 +31,13 @@ export function WithdrawalRequestForm() {
   const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState("");
 
-  // Mock data - TODO: Replace with actual data from smart contract
-  const totalContributions = 120.5;
-  const isVerified = false; // TODO: Get from user state/contract
+  // Get data from contract
+  const totalContributions = workerInfo?.totalContributions ? Number(formatTokenAmount(workerInfo.totalContributions)) : 0;
+  const isVerified = workerInfo?.isVerified || false;
 
-  // Tiered withdrawal limits
-  const tier1Limit = totalContributions; // 100% - your contributions (no verification)
-  const tier2Limit = totalContributions * 2; // 200% - community assistance (verification required)
+  // Tiered withdrawal limits from contract
+  const tier1Limit = limits?.tier1Limit ? Number(formatTokenAmount(limits.tier1Limit)) : totalContributions;
+  const tier2Limit = limits?.tier2Limit ? Number(formatTokenAmount(limits.tier2Limit)) : totalContributions * 2;
   const currentMaxWithdrawal = isVerified ? tier2Limit : tier1Limit;
 
   // Smart alert based on amount
@@ -86,7 +94,26 @@ export function WithdrawalRequestForm() {
   const handleSubmit = async () => {
     if (!account) return;
 
+    // Check if user is registered
+    if (!workerInfo?.isRegistered) {
+      setErrorMessage("You must register as a worker first");
+      setStatus("error");
+      return;
+    }
+
     const withdrawalAmount = parseFloat(amount);
+
+    if (!withdrawalAmount || withdrawalAmount <= 0) {
+      setErrorMessage("Please enter a valid amount");
+      setStatus("error");
+      return;
+    }
+
+    if (!reason.trim()) {
+      setErrorMessage("Please provide a reason for your withdrawal request");
+      setStatus("error");
+      return;
+    }
 
     // Validate against tiered limits
     if (withdrawalAmount > currentMaxWithdrawal) {
@@ -101,19 +128,23 @@ export function WithdrawalRequestForm() {
 
     setIsSubmitting(true);
     setStatus("idle");
+    setErrorMessage("");
 
     try {
-      // TODO: Call smart contract to create withdrawal request
-      // const contract = getBenefitsPoolContract();
-      // const transaction = prepareContractCall({
-      //   contract,
-      //   method: "requestWithdrawal",
-      //   params: [amount, reason],
-      // });
-      // const result = await sendTransaction(transaction);
+      // Convert amount to wei
+      const amountInWei = parseTokenAmount(amount);
 
-      // Simulate request creation
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      // Prepare contract call to requestWithdrawal()
+      const contract = getBenefitsPoolContract();
+      const transaction = prepareContractCall({
+        contract,
+        method: "function requestWithdrawal(uint256 _amount, string _reason) returns (uint256)",
+        params: [amountInWei, reason],
+      });
+
+      // Send transaction
+      const result = await sendTransaction(transaction);
+      console.log("Withdrawal request transaction sent:", result);
 
       // Record in database
       const response = await fetch("/api/withdrawals", {
@@ -124,12 +155,16 @@ export function WithdrawalRequestForm() {
           amount: withdrawalAmount,
           reason,
           urgencyLevel: urgency,
-          requestId: Math.floor(Math.random() * 10000), // Mock request ID
-          txHash: `0x${Math.random().toString(16).slice(2)}`,
+          requestId: 0, // Will be updated from contract events
+          txHash: result.transactionHash,
         }),
       });
 
       if (response.ok) {
+        // Refetch worker info to update the UI
+        await refetchWorkerInfo();
+        await refetchLimits();
+
         setStatus("success");
         setTimeout(() => {
           setStatus("idle");
@@ -138,7 +173,7 @@ export function WithdrawalRequestForm() {
           setUrgency("MEDIUM");
         }, 3000);
       } else {
-        throw new Error("Failed to create withdrawal request");
+        throw new Error("Failed to record withdrawal request in database");
       }
     } catch (error) {
       console.error("Withdrawal request failed:", error);
