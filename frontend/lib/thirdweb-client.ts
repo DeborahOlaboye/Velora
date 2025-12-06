@@ -61,9 +61,10 @@ export const celoMainnet = defineChain({
   testnet: false,
 });
 
-// Export active chain based on environment
-export const activeChain =
-  process.env.NODE_ENV === "production" ? celoMainnet : celoSepolia;
+// Export active chain based on CHAIN_ID from env
+// This uses the NEXT_PUBLIC_CHAIN_ID from .env.local
+const chainId = parseInt(process.env.NEXT_PUBLIC_CHAIN_ID || "42220");
+export const activeChain = chainId === 42220 ? celoMainnet : celoSepolia;
 
 // Contract addresses
 export const BENEFITS_POOL_ADDRESS =
@@ -77,7 +78,7 @@ const CUSD_ADDRESSES = {
 
 export const CUSD_TOKEN_ADDRESS =
   process.env.NEXT_PUBLIC_CUSD_TOKEN_ADDRESS ||
-  (process.env.NODE_ENV === "production"
+  (chainId === 42220
     ? CUSD_ADDRESSES.mainnet
     : CUSD_ADDRESSES.sepolia);
 
