@@ -9,19 +9,66 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, CheckCircle2, XCircle } from "lucide-react";
 import { prepareContractCall } from "thirdweb";
-import { getBenefitsPoolContract } from "@/lib/gasless";
+import { getBenefitsPoolContract } from "@/lib/contracts";
+import { useCUSDBalance } from "@/hooks/useCUSDBalance";
+import { useCUSDAllowance } from "@/hooks/useCUSDAllowance";
+import { useWorkerInfo } from "@/hooks/useWorkerInfo";
+import { parseTokenAmount, formatTokenAmount, needsApproval, prepareApproveTransaction } from "@/lib/token-utils";
 
 export function MakeContribution() {
   const account = useActiveAccount();
   const { mutateAsync: sendTransaction } = useSendTransaction();
+  const { balance: cUSDBalance, refetch: refetchBalance } = useCUSDBalance(account?.address);
+  const { allowance: cUSDAllowance, refetch: refetchAllowance } = useCUSDAllowance(account?.address);
+  const { workerInfo, refetch: refetchWorkerInfo } = useWorkerInfo(account?.address);
   const [amount, setAmount] = useState("5.00");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isApproving, setIsApproving] = useState(false);
   const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState("");
+  const [currentStep, setCurrentStep] = useState<"approve" | "contribute">("contribute");
+
+  const handleApprove = async () => {
+    if (!account) {
+      setErrorMessage("Please connect your wallet");
+      setStatus("error");
+      return;
+    }
+
+    setIsApproving(true);
+    setStatus("idle");
+
+    try {
+      const amountInWei = parseTokenAmount(amount);
+      const approveTransaction = prepareApproveTransaction(amountInWei);
+
+      await sendTransaction(approveTransaction);
+
+      // Refetch allowance
+      await refetchAllowance();
+
+      setCurrentStep("contribute");
+    } catch (error) {
+      console.error("Approval failed:", error);
+      setErrorMessage(
+        error instanceof Error ? error.message : "Approval failed"
+      );
+      setStatus("error");
+    } finally {
+      setIsApproving(false);
+    }
+  };
 
   const handleContribute = async () => {
     if (!account) {
       setErrorMessage("Please connect your wallet");
+      setStatus("error");
+      return;
+    }
+
+    // Check if user is registered
+    if (!workerInfo?.isRegistered) {
+      setErrorMessage("You must register as a worker first");
       setStatus("error");
       return;
     }
@@ -33,21 +80,38 @@ export function MakeContribution() {
       return;
     }
 
+    const amountInWei = parseTokenAmount(amount);
+
+    // Check balance
+    if (cUSDBalance && amountInWei > cUSDBalance) {
+      setErrorMessage("Insufficient cUSD balance");
+      setStatus("error");
+      return;
+    }
+
+    // Check if approval is needed
+    if (needsApproval(amountInWei, cUSDAllowance)) {
+      setCurrentStep("approve");
+      setErrorMessage("Please approve cUSD spending first");
+      setStatus("error");
+      return;
+    }
+
     setIsSubmitting(true);
     setStatus("idle");
 
     try {
-      // TODO: Replace with actual smart contract interaction
-      // const contract = getBenefitsPoolContract();
-      // const transaction = prepareContractCall({
-      //   contract,
-      //   method: "contribute",
-      //   params: [amount],
-      // });
-      // const result = await sendTransaction(transaction);
+      // Prepare contract call to contribute()
+      const contract = getBenefitsPoolContract();
+      const transaction = prepareContractCall({
+        contract,
+        method: "function contribute(uint256 _amount)",
+        params: [amountInWei],
+      });
 
-      // Simulate contribution
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      // Send transaction
+      const result = await sendTransaction(transaction);
+      console.log("Contribution transaction sent:", result);
 
       // Record in database
       await fetch("/api/contributions", {
@@ -56,11 +120,14 @@ export function MakeContribution() {
         body: JSON.stringify({
           walletAddress: account.address,
           amount: contributionAmount,
-          txHash: `0x${Math.random().toString(16).slice(2)}`, // Mock tx hash
-          blockNumber: Math.floor(Math.random() * 1000000),
+          txHash: result.transactionHash,
+          blockNumber: 0, // Will be updated by backend
           contributionType: "MONTHLY",
         }),
       });
+
+      // Refetch balances and worker info
+      await Promise.all([refetchBalance(), refetchAllowance(), refetchWorkerInfo()]);
 
       setStatus("success");
       setTimeout(() => {
@@ -106,11 +173,14 @@ export function MakeContribution() {
             step="0.01"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            disabled={isSubmitting}
+            disabled={isSubmitting || isApproving}
           />
-          <p className="text-sm text-gray-600">
-            Your contribution helps build emergency funds for all workers
-          </p>
+          <div className="flex justify-between text-sm text-gray-600">
+            <span>Your contribution helps build emergency funds for all workers</span>
+            {cUSDBalance !== undefined && (
+              <span>Balance: {formatTokenAmount(cUSDBalance)} cUSD</span>
+            )}
+          </div>
         </div>
 
         <div className="bg-blue-50 p-4 rounded-lg space-y-2">
@@ -144,21 +214,41 @@ export function MakeContribution() {
           </Alert>
         )}
 
-        <Button
-          onClick={handleContribute}
-          disabled={isSubmitting || parseFloat(amount) < 5}
-          className="w-full"
-          size="lg"
-        >
-          {isSubmitting ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Processing...
-            </>
-          ) : (
-            `Contribute ${amount} cUSD`
-          )}
-        </Button>
+        {currentStep === "approve" && (
+          <Button
+            onClick={handleApprove}
+            disabled={isApproving || parseFloat(amount) < 5}
+            className="w-full"
+            size="lg"
+          >
+            {isApproving ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Approving...
+              </>
+            ) : (
+              `Approve ${amount} cUSD`
+            )}
+          </Button>
+        )}
+
+        {currentStep === "contribute" && (
+          <Button
+            onClick={handleContribute}
+            disabled={isSubmitting || parseFloat(amount) < 5}
+            className="w-full"
+            size="lg"
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Processing...
+              </>
+            ) : (
+              `Contribute ${amount} cUSD`
+            )}
+          </Button>
+        )}
       </CardContent>
     </Card>
   );
