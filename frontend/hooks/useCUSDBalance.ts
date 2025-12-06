@@ -11,7 +11,7 @@ export function useCUSDBalance(address?: string) {
   const { data, isLoading, error, refetch } = useReadContract({
     contract,
     method: "function balanceOf(address account) view returns (uint256)",
-    params: address ? [address] : undefined,
+    params: address ? [address] : ["0x0000000000000000000000000000000000000000"],
   });
 
   return {

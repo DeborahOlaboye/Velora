@@ -117,7 +117,7 @@ export default function VerifyPage() {
                 <Shield className="h-5 w-5" />
                 Verification Benefits
               </CardTitle>
-              <CardDescription>What you've unlocked with verification</CardDescription>
+              <CardDescription>What you&apos;ve unlocked with verification</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -252,7 +252,7 @@ export default function VerifyPage() {
           <CardHeader>
             <CardTitle className="text-2xl">Verify with Self Protocol</CardTitle>
             <CardDescription className="text-base">
-              Complete identity verification using Self Protocol's secure verification system
+              Complete identity verification using Self Protocol&apos;s secure verification system
             </CardDescription>
           </CardHeader>
           <CardContent>

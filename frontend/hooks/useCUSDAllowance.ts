@@ -12,7 +12,7 @@ export function useCUSDAllowance(address?: string) {
   const { data, isLoading, error, refetch } = useReadContract({
     contract,
     method: "function allowance(address owner, address spender) view returns (uint256)",
-    params: address ? [address, BENEFITS_POOL_ADDRESS] : undefined,
+    params: address ? [address, BENEFITS_POOL_ADDRESS] : ["0x0000000000000000000000000000000000000000", BENEFITS_POOL_ADDRESS],
   });
 
   return {

@@ -17,7 +17,7 @@ export function useWithdrawalLimits(address?: string) {
   const { data, isLoading, error, refetch } = useReadContract({
     contract,
     method: "function getWithdrawalLimits(address _worker) view returns (uint256 tier1Limit, uint256 tier2Limit, bool needsVerification)",
-    params: address ? [address] : undefined,
+    params: address ? [address] : ["0x0000000000000000000000000000000000000000"],
   });
 
   if (!data || !address) {
