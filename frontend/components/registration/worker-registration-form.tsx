@@ -92,30 +92,39 @@ export function WorkerRegistrationForm() {
         return;
       }
 
-      // Prepare contract call to registerWorker()
+      // Prepare contract call to registerWorker() with metadata
       const contract = getBenefitsPoolContract();
       const transaction = prepareContractCall({
         contract,
-        method: "function registerWorker()",
-        params: [],
+        method: "function registerWorker(string _gigWorkType, string _location, uint8 _yearsExperience, uint256 _monthlyIncome)",
+        params: [
+          workerData.gigWorkType,
+          workerData.location,
+          parseInt(workerData.yearsExperience) || 0,
+          BigInt(Math.floor(parseFloat(workerData.monthlyIncome) || 0)),
+        ],
       });
 
       // Send transaction
       const result = await sendTransaction(transaction);
       console.log("Registration transaction sent:", result);
 
-      // Save additional worker data to database
-      await fetch("/api/users", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          walletAddress: account.address,
-          gigWorkType: workerData.gigWorkType,
-          location: workerData.location,
-          yearsExperience: parseFloat(workerData.yearsExperience) || 0,
-          monthlyIncome: parseFloat(workerData.monthlyIncome) || 0,
-        }),
-      });
+      // Optionally save to database for quick access (data is also on-chain)
+      try {
+        await fetch("/api/users", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            walletAddress: account.address,
+            gigWorkType: workerData.gigWorkType,
+            location: workerData.location,
+            yearsExperience: parseFloat(workerData.yearsExperience) || 0,
+            monthlyIncome: parseFloat(workerData.monthlyIncome) || 0,
+          }),
+        });
+      } catch (dbError) {
+        console.warn("Database save failed, but on-chain registration succeeded:", dbError);
+      }
 
       // Refetch worker info to update the UI
       await refetchWorkerInfo();

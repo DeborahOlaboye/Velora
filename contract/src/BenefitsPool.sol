@@ -334,7 +334,11 @@ contract BenefitsPool is Ownable, ReentrancyGuard, Pausable {
             uint256 lastContributionTime,
             uint256 joinedAt,
             uint256 lastWithdrawalTime,
-            uint256 withdrawalCount
+            uint256 withdrawalCount,
+            string memory gigWorkType,
+            string memory location,
+            uint8 yearsExperience,
+            uint256 monthlyIncome
         )
     {
         Worker storage worker = workers[_worker];
@@ -345,7 +349,11 @@ contract BenefitsPool is Ownable, ReentrancyGuard, Pausable {
             worker.lastContributionTime,
             worker.joinedAt,
             worker.lastWithdrawalTime,
-            worker.withdrawalCount
+            worker.withdrawalCount,
+            worker.gigWorkType,
+            worker.location,
+            worker.yearsExperience,
+            worker.monthlyIncome
         );
     }
 
