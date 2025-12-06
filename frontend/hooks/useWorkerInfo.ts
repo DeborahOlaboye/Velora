@@ -9,6 +9,10 @@ export interface WorkerInfo {
   joinedAt: bigint;
   lastWithdrawalTime: bigint;
   withdrawalCount: bigint;
+  gigWorkType: string;
+  location: string;
+  yearsExperience: number;
+  monthlyIncome: bigint;
 }
 
 /**
@@ -20,8 +24,8 @@ export function useWorkerInfo(address?: string) {
 
   const { data, isLoading, error, refetch } = useReadContract({
     contract,
-    method: "function getWorkerInfo(address _worker) view returns (bool isRegistered, bool isVerified, uint256 totalContributions, uint256 lastContributionTime, uint256 joinedAt, uint256 lastWithdrawalTime, uint256 withdrawalCount)",
-    params: address ? [address] : undefined,
+    method: "function getWorkerInfo(address _worker) view returns (bool isRegistered, bool isVerified, uint256 totalContributions, uint256 lastContributionTime, uint256 joinedAt, uint256 lastWithdrawalTime, uint256 withdrawalCount, string gigWorkType, string location, uint8 yearsExperience, uint256 monthlyIncome)",
+    params: address ? [address] : ["0x0000000000000000000000000000000000000000"],
   });
 
   if (!data || !address) {
@@ -41,6 +45,10 @@ export function useWorkerInfo(address?: string) {
     joinedAt: data[4] as bigint,
     lastWithdrawalTime: data[5] as bigint,
     withdrawalCount: data[6] as bigint,
+    gigWorkType: data[7] as string,
+    location: data[8] as string,
+    yearsExperience: Number(data[9]),
+    monthlyIncome: data[10] as bigint,
   };
 
   return {

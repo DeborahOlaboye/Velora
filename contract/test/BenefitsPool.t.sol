@@ -16,7 +16,20 @@ contract BenefitsPoolTest is Test {
 
     uint256 constant INITIAL_BALANCE = 10000 * 10**18; // 10,000 cUSD
 
-    event WorkerRegistered(address indexed worker, uint256 timestamp);
+    event WorkerRegistered(
+        address indexed worker,
+        string gigWorkType,
+        string location,
+        uint8 yearsExperience,
+        uint256 monthlyIncome,
+        uint256 timestamp
+    );
+
+    // Helper function to register a worker with default test data
+    function registerWorker(address worker) internal {
+        vm.prank(worker);
+        pool.registerWorker("Ride-share Driver", "San Francisco, USA", 2, 2000);
+    }
     event WorkerVerified(address indexed worker, uint256 timestamp);
     event ContributionMade(address indexed worker, uint256 amount, uint256 timestamp);
     event WithdrawalRequested(
@@ -59,10 +72,10 @@ contract BenefitsPoolTest is Test {
     function test_RegisterWorker() public {
         vm.prank(worker1);
         vm.expectEmit(true, false, false, true);
-        emit WorkerRegistered(worker1, block.timestamp);
-        pool.registerWorker();
+        emit WorkerRegistered(worker1, "Ride-share Driver", "San Francisco, USA", 2, 2000, block.timestamp);
+        pool.registerWorker("Ride-share Driver", "San Francisco, USA", 2, 2000);
 
-        (bool isRegistered, , , , uint256 joinedAt, , ) = pool.getWorkerInfo(worker1);
+        (bool isRegistered, , , , uint256 joinedAt, , , , , , ) = pool.getWorkerInfo(worker1);
         assertTrue(isRegistered);
         assertEq(joinedAt, block.timestamp);
         assertEq(pool.totalWorkers(), 1);
@@ -70,22 +83,22 @@ contract BenefitsPoolTest is Test {
 
     function test_CannotRegisterTwice() public {
         vm.startPrank(worker1);
-        pool.registerWorker();
+        pool.registerWorker("Ride-share Driver", "San Francisco, USA", 2, 2000);
 
         vm.expectRevert("Already registered");
-        pool.registerWorker();
+        pool.registerWorker("Ride-share Driver", "San Francisco, USA", 2, 2000);
         vm.stopPrank();
     }
 
     function test_VerifyWorker() public {
         vm.prank(worker1);
-        pool.registerWorker();
+        pool.registerWorker("Ride-share Driver", "San Francisco, USA", 2, 2000);
 
         vm.expectEmit(true, false, false, true);
         emit WorkerVerified(worker1, block.timestamp);
         pool.verifyWorker(worker1);
 
-        (, bool isVerified, , , , , ) = pool.getWorkerInfo(worker1);
+        (, bool isVerified, , , , , , , , , ) = pool.getWorkerInfo(worker1);
         assertTrue(isVerified);
         assertTrue(pool.verifiedIdentities(worker1));
     }
@@ -97,7 +110,7 @@ contract BenefitsPoolTest is Test {
 
     function test_OnlyOwnerCanVerify() public {
         vm.prank(worker1);
-        pool.registerWorker();
+        pool.registerWorker("Ride-share Driver", "San Francisco, USA", 2, 2000);
 
         vm.prank(worker2);
         vm.expectRevert();
@@ -111,7 +124,7 @@ contract BenefitsPoolTest is Test {
     function test_Contribute() public {
         // Register and verify worker
         vm.prank(worker1);
-        pool.registerWorker();
+        pool.registerWorker("Ride-share Driver", "San Francisco, USA", 2, 2000);
         pool.verifyWorker(worker1);
 
         uint256 contributionAmount = 100 * 10**18; // 100 cUSD
@@ -124,7 +137,7 @@ contract BenefitsPoolTest is Test {
         pool.contribute(contributionAmount);
         vm.stopPrank();
 
-        (, , uint256 totalContributions, uint256 lastContribution, , , ) = pool.getWorkerInfo(worker1);
+        (, , uint256 totalContributions, uint256 lastContribution, , , , , , , ) = pool.getWorkerInfo(worker1);
         assertEq(totalContributions, contributionAmount);
         assertEq(lastContribution, block.timestamp);
         assertEq(pool.totalPoolBalance(), contributionAmount);
@@ -132,7 +145,7 @@ contract BenefitsPoolTest is Test {
 
     function test_CannotContributeBelowMinimum() public {
         vm.prank(worker1);
-        pool.registerWorker();
+        pool.registerWorker("Ride-share Driver", "San Francisco, USA", 2, 2000);
         pool.verifyWorker(worker1);
 
         uint256 belowMinimum = 1 * 10**18; // 1 cUSD
@@ -146,7 +159,7 @@ contract BenefitsPoolTest is Test {
 
     function test_CannotContributeWithoutVerification() public {
         vm.prank(worker1);
-        pool.registerWorker();
+        pool.registerWorker("Ride-share Driver", "San Francisco, USA", 2, 2000);
 
         uint256 amount = 100 * 10**18;
 
@@ -159,7 +172,7 @@ contract BenefitsPoolTest is Test {
 
     function test_MultipleContributions() public {
         vm.prank(worker1);
-        pool.registerWorker();
+        pool.registerWorker("Ride-share Driver", "San Francisco, USA", 2, 2000);
         pool.verifyWorker(worker1);
 
         uint256 firstContribution = 100 * 10**18;
@@ -171,7 +184,7 @@ contract BenefitsPoolTest is Test {
         pool.contribute(secondContribution);
         vm.stopPrank();
 
-        (, , uint256 totalContributions, , , , ) = pool.getWorkerInfo(worker1);
+        (, , uint256 totalContributions, , , , , , , , ) = pool.getWorkerInfo(worker1);
         assertEq(totalContributions, firstContribution + secondContribution);
         assertEq(pool.totalPoolBalance(), firstContribution + secondContribution);
     }
@@ -435,7 +448,7 @@ contract BenefitsPoolTest is Test {
         // Cannot register while paused
         vm.prank(worker1);
         vm.expectRevert();
-        pool.registerWorker();
+        pool.registerWorker("Ride-share Driver", "San Francisco, USA", 2, 2000);
     }
 
     function test_Unpause() public {
@@ -450,7 +463,7 @@ contract BenefitsPoolTest is Test {
 
     function _setupWorkerWithContributions(address worker, uint256 amount) internal {
         vm.prank(worker);
-        pool.registerWorker();
+        pool.registerWorker("Ride-share Driver", "San Francisco, USA", 2, 2000);
         pool.verifyWorker(worker);
 
         vm.startPrank(worker);
@@ -468,7 +481,7 @@ contract BenefitsPoolTest is Test {
 
         for (uint256 i = 0; i < voters.length; i++) {
             vm.prank(voters[i]);
-            pool.registerWorker();
+            pool.registerWorker("Ride-share Driver", "San Francisco, USA", 2, 2000);
             pool.verifyWorker(voters[i]);
 
             vm.prank(voters[i]);
