@@ -50,7 +50,7 @@ contract BenefitsPool is Ownable, ReentrancyGuard, Pausable {
     uint256 public votingPeriod = 7 days;
     uint256 public withdrawalCooldown = 90 days; // 3 months between withdrawals
     uint256 public votingThreshold = 60; // 60% approval needed
-    uint256 public maxWithdrawalPercentage = 50; // DEPRECATED - Using tiered system now (100% tier1, 200% tier2)
+    uint256 public maxWithdrawalPercentage = 50; // Max 50% of contributions
 
     // Events
     event WorkerRegistered(address indexed worker, uint256 timestamp);
