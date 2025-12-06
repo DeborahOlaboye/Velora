@@ -69,9 +69,17 @@ export const activeChain =
 export const BENEFITS_POOL_ADDRESS =
   process.env.NEXT_PUBLIC_BENEFITS_POOL_CONTRACT_ADDRESS || "";
 
+// cUSD addresses by network
+const CUSD_ADDRESSES = {
+  sepolia: "0x00BFD44e79FB7f6dd5887A9426c8EF85A0CD23e0", // Celo Sepolia
+  mainnet: "0x765DE816845861e75A25fCA122bb6898B8B1282a", // Celo Mainnet (Mento)
+};
+
 export const CUSD_TOKEN_ADDRESS =
   process.env.NEXT_PUBLIC_CUSD_TOKEN_ADDRESS ||
-  "0x874069Fa1Eb16D44d622F2e0Ca25eeA172369bC1"; // Celo Alfajores cUSD
+  (process.env.NODE_ENV === "production"
+    ? CUSD_ADDRESSES.mainnet
+    : CUSD_ADDRESSES.sepolia);
 
 // Wallet configuration
 export const walletConfig = {
