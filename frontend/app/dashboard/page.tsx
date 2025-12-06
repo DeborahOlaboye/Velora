@@ -3,23 +3,37 @@
 import { useState } from "react";
 import { useActiveAccount } from "thirdweb/react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { WorkerProfile } from "@/components/profile/worker-profile";
 import { ClaimWidget } from "@/components/gooddollar/claim-widget";
 import { SelfProtocolVerifier } from "@/components/verification/self-protocol-verifier";
+import { PoolStats } from "@/components/pool/pool-stats";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ConnectWalletButton } from "@/components/wallet/connect-wallet-button";
-import { TrendingUp, CheckCircle2 } from "lucide-react";
+import { TrendingUp, CheckCircle2, Shield, DollarSign, Wallet, ArrowRight, Loader2 } from "lucide-react";
+import { useWorkerInfo } from "@/hooks/useWorkerInfo";
+import { useWithdrawalLimits } from "@/hooks/useWithdrawalLimits";
+import { useCUSDBalance } from "@/hooks/useCUSDBalance";
+import { formatTokenAmount } from "@/lib/token-utils";
 
 export default function DashboardPage() {
   const account = useActiveAccount();
   const router = useRouter();
+  const { workerInfo, isLoading: workerLoading } = useWorkerInfo(account?.address);
+  const { limits, isLoading: limitsLoading } = useWithdrawalLimits(account?.address);
+  const { balance: cUSDBalance, isLoading: balanceLoading } = useCUSDBalance(account?.address);
   const [isVerified, setIsVerified] = useState(false);
 
-  // Mock data - TODO: Replace with actual data from smart contract
-  const totalContributions = 120.5; // TODO: Fetch from contract using getWorkerInfo()
+  // Get data from smart contract
+  const totalContributions = workerInfo?.totalContributions
+    ? Number(formatTokenAmount(workerInfo.totalContributions))
+    : 0;
+  const isWorkerVerified = workerInfo?.isVerified || false;
+  const isLoading = workerLoading || limitsLoading || balanceLoading;
 
   if (!account) {
     return (
@@ -41,7 +55,7 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-4">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-7xl mx-auto space-y-6">
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-2">Dashboard</h1>
           <p className="text-lg text-gray-600">
@@ -49,8 +63,37 @@ export default function DashboardPage() {
           </p>
         </div>
 
+        {/* Pool Statistics */}
+        <PoolStats />
+
+        {/* Loading State */}
+        {isLoading && (
+          <Card>
+            <CardContent className="flex justify-center items-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Registration Prompt */}
+        {!isLoading && !workerInfo?.isRegistered && (
+          <Alert className="bg-yellow-50 border-yellow-200">
+            <AlertDescription className="text-yellow-800">
+              <div className="flex justify-between items-center">
+                <span>You need to register as a worker to participate in the pool</span>
+                <Link href="/register">
+                  <Button size="sm">
+                    Register Now
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </Link>
+              </div>
+            </AlertDescription>
+          </Alert>
+        )}
+
         {/* Optional Verification Banner - Only show for unverified users with contributions */}
-        {!isVerified && totalContributions > 0 && (
+        {!isLoading && !isWorkerVerified && totalContributions > 0 && (
           <Alert className="bg-blue-50 border-blue-200 mb-6">
             <TrendingUp className="h-5 w-5 text-blue-600" />
             <AlertDescription>
@@ -89,7 +132,7 @@ export default function DashboardPage() {
         )}
 
         {/* Success banner for verified users */}
-        {isVerified && (
+        {!isLoading && isWorkerVerified && (
           <Alert className="bg-green-50 border-green-200 mb-6">
             <CheckCircle2 className="h-5 w-5 text-green-600" />
             <AlertDescription>
@@ -105,6 +148,60 @@ export default function DashboardPage() {
               </div>
             </AlertDescription>
           </Alert>
+        )}
+
+        {/* Quick Stats for Registered Users */}
+        {!isLoading && workerInfo?.isRegistered && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium flex items-center gap-2">
+                  <Wallet className="h-4 w-4" />
+                  cUSD Balance
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-green-600">
+                  {cUSDBalance ? formatTokenAmount(cUSDBalance) : "0"} cUSD
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium flex items-center gap-2">
+                  <DollarSign className="h-4 w-4" />
+                  Total Contributions
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-blue-600">
+                  {totalContributions.toFixed(2)} cUSD
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium flex items-center gap-2">
+                  <Shield className="h-4 w-4" />
+                  Verification Status
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {isWorkerVerified ? (
+                  <Badge variant="default" className="bg-green-600">
+                    <CheckCircle2 className="mr-1 h-3 w-3" />
+                    Verified
+                  </Badge>
+                ) : (
+                  <Badge variant="secondary">
+                    Not Verified
+                  </Badge>
+                )}
+              </CardContent>
+            </Card>
+          </div>
         )}
 
         <Tabs defaultValue="profile" className="space-y-6">
