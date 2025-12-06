@@ -20,7 +20,7 @@ Velora is a mutual aid platform for gig workers, built on Celo blockchain. Worke
 
 ### Contract Details
 - **Network**: Celo Mainnet (Chain ID: 42220)
-- **Contract Address**: `0xaFAaD60c317Ef5329001eE1Eb47449Bf60DeE0CD`
+- **Contract Address**: `0xaD253E6964eB43eD19055d76B77b04c7C1aCCfbC`
 - **cUSD Token**: `0x765DE816845861e75A25fCA122bb6898B8B1282a`
 
 ## Setup Instructions
@@ -46,7 +46,7 @@ Velora is a mutual aid platform for gig workers, built on Celo blockchain. Worke
    NODE_ENV=production
    NEXT_PUBLIC_CELO_RPC_URL=https://celo.drpc.org
    NEXT_PUBLIC_CHAIN_ID=42220
-   NEXT_PUBLIC_BENEFITS_POOL_CONTRACT_ADDRESS=0xaFAaD60c317Ef5329001eE1Eb47449Bf60DeE0CD
+   NEXT_PUBLIC_BENEFITS_POOL_CONTRACT_ADDRESS=0xaD253E6964eB43eD19055d76B77b04c7C1aCCfbC
    NEXT_PUBLIC_CUSD_TOKEN_ADDRESS=0x765DE816845861e75A25fCA122bb6898B8B1282a
    NEXT_PUBLIC_THIRDWEB_CLIENT_ID=your_client_id_here
    THIRDWEB_SECRET_KEY=your_secret_here
