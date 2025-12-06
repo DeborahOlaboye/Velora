@@ -7,9 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { SelfProtocolVerifier } from "@/components/verification/self-protocol-verifier";
 import { CheckCircle2, Loader2 } from "lucide-react";
 
 interface WorkerData {
@@ -28,10 +26,9 @@ interface RegistrationStep {
 }
 
 const STEPS: RegistrationStep[] = [
-  { number: 1, title: "Identity Verification", description: "Verify your identity with Self Protocol" },
-  { number: 2, title: "Worker Information", description: "Tell us about your gig work" },
-  { number: 3, title: "Contribution Setup", description: "Set your initial contribution" },
-  { number: 4, title: "Review & Submit", description: "Review and submit your registration" },
+  { number: 1, title: "Worker Information", description: "Tell us about your gig work" },
+  { number: 2, title: "Contribution Setup", description: "Set your initial contribution" },
+  { number: 3, title: "Review & Submit", description: "Review and submit your registration" },
 ];
 
 const GIG_WORK_TYPES = [
@@ -49,8 +46,8 @@ const GIG_WORK_TYPES = [
 export function WorkerRegistrationForm() {
   const account = useActiveAccount();
   const [currentStep, setCurrentStep] = useState(1);
-  const [isVerified, setIsVerified] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [registrationSuccess, setRegistrationSuccess] = useState(false);
   const [workerData, setWorkerData] = useState<WorkerData>({
     gigWorkType: "",
     location: "",
@@ -59,13 +56,6 @@ export function WorkerRegistrationForm() {
     initialContribution: "5",
     agreedToTerms: false,
   });
-
-  const handleVerificationComplete = (verified: boolean, userId: string) => {
-    setIsVerified(verified);
-    if (verified) {
-      setTimeout(() => setCurrentStep(2), 1500);
-    }
-  };
 
   const handleNext = () => {
     if (currentStep < STEPS.length) {
@@ -89,7 +79,7 @@ export function WorkerRegistrationForm() {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 2000));
 
-      alert("Registration successful! Welcome to the Benefits Pool.");
+      setRegistrationSuccess(true);
     } catch (error) {
       console.error("Registration failed:", error);
       alert("Registration failed. Please try again.");
@@ -97,6 +87,54 @@ export function WorkerRegistrationForm() {
       setIsSubmitting(false);
     }
   };
+
+  // Show success message after registration
+  if (registrationSuccess) {
+    return (
+      <Card className="max-w-2xl mx-auto">
+        <CardHeader>
+          <CardTitle className="text-center text-green-600">✓ Registration Successful!</CardTitle>
+          <CardDescription className="text-center">
+            Welcome to the Velora Benefits Pool
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Alert className="bg-green-50 border-green-200">
+            <AlertDescription>
+              <p className="font-semibold mb-2">You can now:</p>
+              <ul className="list-disc list-inside space-y-1 text-sm">
+                <li>Make contributions to the pool</li>
+                <li>Request withdrawals up to 100% of your contributions</li>
+                <li>Vote on community withdrawal requests</li>
+              </ul>
+            </AlertDescription>
+          </Alert>
+
+          <Alert className="bg-blue-50 border-blue-200">
+            <AlertDescription>
+              <p className="font-semibold mb-2">💡 Optional: Verify Your Identity</p>
+              <p className="text-sm mb-2">
+                Verification is NOT required to participate, but it unlocks:
+              </p>
+              <ul className="list-disc list-inside space-y-1 text-sm mb-3">
+                <li>Access to community assistance (withdraw up to 200% of contributions)</li>
+                <li>Higher withdrawal limits during emergencies</li>
+                <li>Increased trust in the community</li>
+              </ul>
+              <div className="flex gap-2">
+                <Button onClick={() => window.location.href = '/verify'} size="sm">
+                  Verify Now
+                </Button>
+                <Button onClick={() => window.location.href = '/dashboard'} variant="outline" size="sm">
+                  Skip for Now
+                </Button>
+              </div>
+            </AlertDescription>
+          </Alert>
+        </CardContent>
+      </Card>
+    );
+  }
 
   if (!account) {
     return (
@@ -147,10 +185,6 @@ export function WorkerRegistrationForm() {
 
       {/* Step Content */}
       {currentStep === 1 && (
-        <SelfProtocolVerifier onVerificationComplete={handleVerificationComplete} />
-      )}
-
-      {currentStep === 2 && (
         <Card>
           <CardHeader>
             <CardTitle>Worker Information</CardTitle>
@@ -233,7 +267,7 @@ export function WorkerRegistrationForm() {
         </Card>
       )}
 
-      {currentStep === 3 && (
+      {currentStep === 2 && (
         <Card>
           <CardHeader>
             <CardTitle>Initial Contribution</CardTitle>
@@ -263,8 +297,9 @@ export function WorkerRegistrationForm() {
             <div className="bg-blue-50 p-4 rounded-lg space-y-2">
               <h4 className="font-semibold">Benefits Pool Information</h4>
               <ul className="text-sm space-y-1 text-gray-700">
-                <li>• Minimum contribution: 5 cUSD per month</li>
-                <li>• Emergency withdrawals up to 50% of your contributions</li>
+                <li>• Minimum contribution: 5 cUSD</li>
+                <li>• Tier 1: Withdraw up to 100% of contributions (no verification)</li>
+                <li>• Tier 2: Withdraw up to 200% of contributions (with verification)</li>
                 <li>• Community voting on withdrawal requests</li>
                 <li>• 90-day cooldown between withdrawals</li>
               </ul>
@@ -285,7 +320,7 @@ export function WorkerRegistrationForm() {
         </Card>
       )}
 
-      {currentStep === 4 && (
+      {currentStep === 3 && (
         <Card>
           <CardHeader>
             <CardTitle>Review & Submit</CardTitle>
@@ -298,10 +333,6 @@ export function WorkerRegistrationForm() {
               <div>
                 <span className="font-semibold">Wallet Address:</span>
                 <p className="text-sm text-gray-700">{account.address}</p>
-              </div>
-              <div>
-                <span className="font-semibold">Identity Verified:</span>
-                <p className="text-sm text-green-600">✓ Verified with Self Protocol</p>
               </div>
               <div>
                 <span className="font-semibold">Gig Work Type:</span>
@@ -318,6 +349,13 @@ export function WorkerRegistrationForm() {
                 </p>
               </div>
             </div>
+
+            <Alert className="bg-blue-50 border-blue-200">
+              <AlertDescription className="text-sm">
+                <p className="font-semibold mb-1">📝 Note about verification:</p>
+                <p>Verification is optional. You can verify later to unlock higher withdrawal limits (up to 200% of contributions).</p>
+              </AlertDescription>
+            </Alert>
 
             <div className="flex items-start space-x-2">
               <input

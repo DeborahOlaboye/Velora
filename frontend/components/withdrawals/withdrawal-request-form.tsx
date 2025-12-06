@@ -9,10 +9,13 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, CheckCircle2, AlertCircle } from "lucide-react";
+import { Loader2, CheckCircle2, AlertCircle, AlertTriangle, Info } from "lucide-react";
+import { WithdrawalLimitsDisplay } from "./withdrawal-limits-display";
+import { useRouter } from "next/navigation";
 
 export function WithdrawalRequestForm() {
   const account = useActiveAccount();
+  const router = useRouter();
   const [amount, setAmount] = useState("");
   const [reason, setReason] = useState("");
   const [urgency, setUrgency] = useState("MEDIUM");
@@ -20,16 +23,78 @@ export function WithdrawalRequestForm() {
   const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState("");
 
-  // Mock data - replace with actual from smart contract
+  // Mock data - TODO: Replace with actual data from smart contract
   const totalContributions = 120.5;
-  const maxWithdrawal = totalContributions * 0.5;
+  const isVerified = false; // TODO: Get from user state/contract
+
+  // Tiered withdrawal limits
+  const tier1Limit = totalContributions; // 100% - your contributions (no verification)
+  const tier2Limit = totalContributions * 2; // 200% - community assistance (verification required)
+  const currentMaxWithdrawal = isVerified ? tier2Limit : tier1Limit;
+
+  // Smart alert based on amount
+  const getWithdrawalAlert = () => {
+    const withdrawalAmount = parseFloat(amount);
+    if (!amount || isNaN(withdrawalAmount)) return null;
+
+    // Amount exceeds absolute maximum (200%)
+    if (withdrawalAmount > tier2Limit) {
+      return {
+        variant: "destructive" as const,
+        icon: AlertCircle,
+        title: "Amount Too High",
+        message: `Maximum withdrawal is ${tier2Limit.toFixed(2)} cUSD (200% of your contributions). Please reduce the amount.`,
+      };
+    }
+
+    // Amount requires verification (between 100% and 200%)
+    if (withdrawalAmount > tier1Limit && !isVerified) {
+      return {
+        variant: "warning" as const,
+        icon: AlertTriangle,
+        title: "Verification Required",
+        message: `To withdraw more than ${tier1Limit.toFixed(2)} cUSD, you need to verify your identity. This allows access to community assistance funds.`,
+        showVerifyButton: true,
+      };
+    }
+
+    // Amount is within verified limit (accessing community funds)
+    if (withdrawalAmount > tier1Limit && isVerified) {
+      return {
+        variant: "info" as const,
+        icon: Info,
+        title: "Using Community Assistance",
+        message: `You're requesting ${(withdrawalAmount - tier1Limit).toFixed(2)} cUSD from community funds (beyond your ${tier1Limit.toFixed(2)} cUSD contributions).`,
+      };
+    }
+
+    // Amount is within Tier 1 (your own contributions)
+    if (withdrawalAmount <= tier1Limit) {
+      return {
+        variant: "success" as const,
+        icon: CheckCircle2,
+        title: "No Verification Needed",
+        message: `You're withdrawing from your own contributions. No verification required!`,
+      };
+    }
+
+    return null;
+  };
+
+  const alert = getWithdrawalAlert();
 
   const handleSubmit = async () => {
     if (!account) return;
 
     const withdrawalAmount = parseFloat(amount);
-    if (withdrawalAmount > maxWithdrawal) {
-      setErrorMessage(`Maximum withdrawal is ${maxWithdrawal.toFixed(2)} cUSD (50% of contributions)`);
+
+    // Validate against tiered limits
+    if (withdrawalAmount > currentMaxWithdrawal) {
+      if (!isVerified && withdrawalAmount <= tier2Limit) {
+        setErrorMessage(`Please verify your identity to withdraw up to ${tier2Limit.toFixed(2)} cUSD. Current limit: ${tier1Limit.toFixed(2)} cUSD`);
+      } else {
+        setErrorMessage(`Maximum withdrawal is ${tier2Limit.toFixed(2)} cUSD (200% of contributions)`);
+      }
       setStatus("error");
       return;
     }
@@ -97,22 +162,23 @@ export function WithdrawalRequestForm() {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Emergency Withdrawal Request</CardTitle>
-        <CardDescription>
-          Request emergency funds from the pool (requires community approval)
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <Alert>
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
-            <strong>Your eligibility:</strong> You can request up to{" "}
-            <strong>{maxWithdrawal.toFixed(2)} cUSD</strong> (50% of your total
-            contributions of {totalContributions.toFixed(2)} cUSD)
-          </AlertDescription>
-        </Alert>
+    <div className="space-y-6">
+      {/* Withdrawal Limits Display */}
+      <WithdrawalLimitsDisplay
+        totalContributions={totalContributions}
+        isVerified={isVerified}
+        showVerifyButton={true}
+        compact={false}
+      />
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Emergency Withdrawal Request</CardTitle>
+          <CardDescription>
+            Request emergency funds from the pool (requires community approval)
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
 
         <div className="space-y-2">
           <Label htmlFor="amount">Withdrawal Amount (cUSD)</Label>
@@ -120,13 +186,49 @@ export function WithdrawalRequestForm() {
             id="amount"
             type="number"
             min="0"
-            max={maxWithdrawal}
+            max={tier2Limit}
             step="0.01"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
             disabled={isSubmitting}
+            placeholder={`Max: ${currentMaxWithdrawal.toFixed(2)} cUSD`}
           />
+          <p className="text-sm text-gray-600">
+            Current limit: {currentMaxWithdrawal.toFixed(2)} cUSD
+            {!isVerified && ` (verify to unlock ${tier2Limit.toFixed(2)} cUSD)`}
+          </p>
         </div>
+
+        {/* Smart Contextual Alert */}
+        {alert && (
+          <Alert className={
+            alert.variant === "success" ? "bg-green-50 border-green-200" :
+            alert.variant === "warning" ? "bg-yellow-50 border-yellow-200" :
+            alert.variant === "info" ? "bg-blue-50 border-blue-200" :
+            "bg-red-50 border-red-200"
+          }>
+            <alert.icon className={`h-4 w-4 ${
+              alert.variant === "success" ? "text-green-600" :
+              alert.variant === "warning" ? "text-yellow-600" :
+              alert.variant === "info" ? "text-blue-600" :
+              "text-red-600"
+            }`} />
+            <AlertDescription>
+              <p className="font-semibold mb-1">{alert.title}</p>
+              <p className="text-sm">{alert.message}</p>
+              {alert.showVerifyButton && (
+                <Button
+                  onClick={() => router.push('/verify')}
+                  size="sm"
+                  className="mt-3"
+                  variant="default"
+                >
+                  Verify Identity Now
+                </Button>
+              )}
+            </AlertDescription>
+          </Alert>
+        )}
 
         <div className="space-y-2">
           <Label htmlFor="urgency">Urgency Level</Label>
@@ -190,7 +292,7 @@ export function WithdrawalRequestForm() {
             isSubmitting ||
             !amount ||
             !reason ||
-            parseFloat(amount) > maxWithdrawal ||
+            parseFloat(amount) > currentMaxWithdrawal ||
             parseFloat(amount) <= 0
           }
           className="w-full"
@@ -207,5 +309,6 @@ export function WithdrawalRequestForm() {
         </Button>
       </CardContent>
     </Card>
+    </div>
   );
 }
