@@ -24,6 +24,11 @@ contract BenefitsPool is Ownable, ReentrancyGuard, Pausable {
         uint256 joinedAt;
         uint256 lastWithdrawalTime;
         uint256 withdrawalCount;
+        // Worker metadata
+        string gigWorkType;
+        string location;
+        uint8 yearsExperience;
+        uint256 monthlyIncome;
     }
 
     struct WithdrawalRequest {
@@ -53,7 +58,14 @@ contract BenefitsPool is Ownable, ReentrancyGuard, Pausable {
     uint256 public maxWithdrawalPercentage = 50; // Max 50% of contributions
 
     // Events
-    event WorkerRegistered(address indexed worker, uint256 timestamp);
+    event WorkerRegistered(
+        address indexed worker,
+        string gigWorkType,
+        string location,
+        uint8 yearsExperience,
+        uint256 monthlyIncome,
+        uint256 timestamp
+    );
     event WorkerVerified(address indexed worker, uint256 timestamp);
     event ContributionMade(address indexed worker, uint256 amount, uint256 timestamp);
     event WithdrawalRequested(
@@ -107,9 +119,20 @@ contract BenefitsPool is Ownable, ReentrancyGuard, Pausable {
 
     /**
      * @dev Register as a new worker in the pool
+     * @param _gigWorkType Type of gig work (e.g., "Ride-share Driver")
+     * @param _location Worker's location (e.g., "San Francisco, USA")
+     * @param _yearsExperience Years of experience in gig work
+     * @param _monthlyIncome Average monthly income in USD
      */
-    function registerWorker() external whenNotPaused {
+    function registerWorker(
+        string calldata _gigWorkType,
+        string calldata _location,
+        uint8 _yearsExperience,
+        uint256 _monthlyIncome
+    ) external whenNotPaused {
         require(!workers[msg.sender].isRegistered, "Already registered");
+        require(bytes(_gigWorkType).length > 0, "Gig work type required");
+        require(bytes(_location).length > 0, "Location required");
 
         workers[msg.sender] = Worker({
             isRegistered: true,
@@ -118,11 +141,22 @@ contract BenefitsPool is Ownable, ReentrancyGuard, Pausable {
             lastContributionTime: 0,
             joinedAt: block.timestamp,
             lastWithdrawalTime: 0,
-            withdrawalCount: 0
+            withdrawalCount: 0,
+            gigWorkType: _gigWorkType,
+            location: _location,
+            yearsExperience: _yearsExperience,
+            monthlyIncome: _monthlyIncome
         });
 
         totalWorkers++;
-        emit WorkerRegistered(msg.sender, block.timestamp);
+        emit WorkerRegistered(
+            msg.sender,
+            _gigWorkType,
+            _location,
+            _yearsExperience,
+            _monthlyIncome,
+            block.timestamp
+        );
     }
 
     /**
