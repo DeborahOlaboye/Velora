@@ -123,8 +123,8 @@ export async function GET(request: NextRequest) {
 
     const summary = {
       total: votes.length,
-      for: votes.filter((v) => v.support).length,
-      against: votes.filter((v) => !v.support).length,
+      for: votes.filter((v: { support: boolean }) => v.support).length,
+      against: votes.filter((v: { support: boolean }) => !v.support).length,
     };
 
     return NextResponse.json({ votes, summary });
