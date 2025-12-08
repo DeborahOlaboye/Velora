@@ -386,8 +386,8 @@ export function WorkerRegistrationForm() {
               <Input
                 id="contribution"
                 type="number"
-                min="0.01"
-                step="0.01"
+                min="0.000001"
+                step="0.000001"
                 placeholder="1.00"
                 value={workerData.initialContribution}
                 onChange={(e) =>

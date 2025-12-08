@@ -38,18 +38,17 @@ export function SelfProtocolVerifier({
       const app = new SelfAppBuilder({
         version: 2,
         appName: process.env.NEXT_PUBLIC_SELF_APP_NAME || "Velora",
-        scope: process.env.NEXT_PUBLIC_SELF_SCOPE || "velora-app",
-        endpoint: process.env.NEXT_PUBLIC_SELF_ENDPOINT || "https://api.staging.self.xyz",
-        logoBase64: "https://i.postimg.cc/mrmVf9hm/self.png", // Replace with your app's logo
+        scope: process.env.NEXT_PUBLIC_SELF_SCOPE || "velora-benefits-pool",
+        endpoint: process.env.NEXT_PUBLIC_SELF_ENDPOINT || "https://api.self.xyz",
+        logoBase64: `${process.env.NEXT_PUBLIC_APP_URL}/logo.png`, // Use your hosted logo
         userId: account.address,
-        endpointType: "staging_https",
+        endpointType: (process.env.NEXT_PUBLIC_SELF_ENDPOINT_TYPE as any) || "production_https",
         userIdType: "hex",
-        userDefinedData: "Velora Identity Verification",
+        userDefinedData: "Velora Identity Verification for Benefits Pool Access",
         disclosures: {
           minimumAge: minimumAge,
           nationality: requiredDisclosures.nationality,
           gender: requiredDisclosures.gender,
-          // documentNumber is not a valid property in SelfAppDisclosureConfig
         },
       }).build();
 

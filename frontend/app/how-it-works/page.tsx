@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { CheckCircle2, ArrowRight, Wallet, FileText, Vote, HandHeart, Shield, Clock } from "lucide-react";
@@ -359,12 +360,12 @@ export default function HowItWorksPage() {
             <p className="text-blue-800 mb-4">
               Join thousands of gig workers building financial security together.
             </p>
-            <a
+            <Link
               href="/"
               className="inline-flex items-center justify-center px-6 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
             >
               Connect Your Wallet
-            </a>
+            </Link>
           </AlertDescription>
         </Alert>
       </div>
