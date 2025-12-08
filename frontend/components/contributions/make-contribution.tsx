@@ -21,7 +21,7 @@ export function MakeContribution() {
   const { balance: cUSDBalance, refetch: refetchBalance } = useCUSDBalance(account?.address);
   const { allowance: cUSDAllowance, refetch: refetchAllowance } = useCUSDAllowance(account?.address);
   const { workerInfo, refetch: refetchWorkerInfo } = useWorkerInfo(account?.address);
-  const [amount, setAmount] = useState("5.00");
+  const [amount, setAmount] = useState("1.00");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isApproving, setIsApproving] = useState(false);
   const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
@@ -136,7 +136,7 @@ export function MakeContribution() {
       setStatus("success");
       setTimeout(() => {
         setStatus("idle");
-        setAmount("5.00");
+        setAmount("1.00");
       }, 3000);
     } catch (error) {
       console.error("Contribution failed:", error);
@@ -174,7 +174,7 @@ export function MakeContribution() {
       <CardHeader>
         <CardTitle className="text-2xl">Contribution Details</CardTitle>
         <CardDescription className="text-base">
-          Contribute to build your emergency fund (minimum 5 cUSD)
+          Contribute to build your emergency fund
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -184,7 +184,7 @@ export function MakeContribution() {
           <Input
             id="amount"
             type="number"
-            min="5"
+            min="0.01"
             step="0.01"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
@@ -192,7 +192,7 @@ export function MakeContribution() {
             className="h-12 text-lg font-semibold"
           />
           <div className="flex justify-between text-sm">
-            <span className="text-gray-600">Minimum: 5 cUSD</span>
+            <span className="text-gray-600">Any amount welcome</span>
             {cUSDBalance !== undefined && (
               <span className={`font-medium ${
                 cUSDBalance === 0n ? 'text-red-600' :
@@ -294,7 +294,7 @@ export function MakeContribution() {
             </Alert>
             <Button
               onClick={handleApprove}
-              disabled={isApproving || parseFloat(amount) < 5}
+              disabled={isApproving || parseFloat(amount) <= 0}
               className="w-full bg-yellow-600 hover:bg-yellow-700"
               size="lg"
             >
@@ -313,7 +313,7 @@ export function MakeContribution() {
         {currentStep === "contribute" && (
           <Button
             onClick={handleContribute}
-            disabled={isSubmitting || parseFloat(amount) < 5}
+            disabled={isSubmitting || parseFloat(amount) <= 0}
             className="w-full bg-blue-600 hover:bg-blue-700"
             size="lg"
           >
