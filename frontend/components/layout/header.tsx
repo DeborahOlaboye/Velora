@@ -53,9 +53,26 @@ export function Header() {
                 </Link>
               </>
             ) : (
-              <div className="text-sm text-gray-500">
-                Connect wallet to access features
-              </div>
+              <>
+                <Link
+                  href="/how-it-works"
+                  className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors"
+                >
+                  How It Works
+                </Link>
+                <Link
+                  href="/about"
+                  className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors"
+                >
+                  About
+                </Link>
+                <Link
+                  href="/docs"
+                  className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors"
+                >
+                  Docs
+                </Link>
+              </>
             )}
           </div>
 
@@ -117,9 +134,29 @@ export function Header() {
                   </Link>
                 </>
               ) : (
-                <div className="px-3 py-2 text-sm text-gray-500">
-                  Connect wallet to access features
-                </div>
+                <>
+                  <Link
+                    href="/how-it-works"
+                    className="text-base font-medium text-gray-700 hover:text-blue-600 transition-colors px-3 py-2"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    How It Works
+                  </Link>
+                  <Link
+                    href="/about"
+                    className="text-base font-medium text-gray-700 hover:text-blue-600 transition-colors px-3 py-2"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    About
+                  </Link>
+                  <Link
+                    href="/docs"
+                    className="text-base font-medium text-gray-700 hover:text-blue-600 transition-colors px-3 py-2"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Docs
+                  </Link>
+                </>
               )}
               <div className="px-3 pt-3 border-t border-gray-200">
                 <ConnectWalletButton />
