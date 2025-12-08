@@ -5,6 +5,8 @@ import { ConnectWalletButton } from "@/components/wallet/connect-wallet-button";
 import { useActiveAccount } from "thirdweb/react";
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/layout/header";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import {
   ArrowRight,
   Shield,
@@ -18,6 +20,14 @@ import {
 
 export default function Home() {
   const account = useActiveAccount();
+  const router = useRouter();
+
+  // Redirect to dashboard when wallet is connected
+  useEffect(() => {
+    if (account) {
+      router.push("/dashboard");
+    }
+  }, [account, router]);
 
   return (
     <div className="min-h-screen bg-white">

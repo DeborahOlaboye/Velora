@@ -14,7 +14,7 @@ interface AuthGuardProps {
 }
 
 // Pages that don't require authentication
-const PUBLIC_PAGES = ["/"];
+const PUBLIC_PAGES = ["/", "/docs", "/about", "/how-it-works"];
 
 // Pages that require wallet connection but not registration
 const WALLET_ONLY_PAGES = ["/register"];
