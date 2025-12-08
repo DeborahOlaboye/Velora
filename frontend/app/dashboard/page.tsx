@@ -30,7 +30,7 @@ import {
 import { useWorkerInfo } from "@/hooks/useWorkerInfo";
 import { useWithdrawalLimits } from "@/hooks/useWithdrawalLimits";
 import { useCUSDBalance } from "@/hooks/useCUSDBalance";
-import { formatTokenAmount } from "@/lib/token-utils";
+import { formatTokenAmount, formatDisplayAmount } from "@/lib/token-utils";
 
 export default function DashboardPage() {
   const account = useActiveAccount();
@@ -130,13 +130,13 @@ export default function DashboardPage() {
                     <div className="flex items-center gap-2">
                       <CheckCircle2 className="h-4 w-4 text-green-600 flex-shrink-0" />
                       <span className="text-gray-700">
-                        Current: <strong>{totalContributions.toFixed(2)} cUSD</strong> (Tier 1)
+                        Current: <strong>{formatDisplayAmount(totalContributions)} cUSD</strong> (Tier 1)
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
                       <Shield className="h-4 w-4 text-purple-600 flex-shrink-0" />
                       <span className="text-gray-700">
-                        With verification: <strong>{(totalContributions * 2).toFixed(2)} cUSD</strong> (Tier 2)
+                        With verification: <strong>{formatDisplayAmount(totalContributions * 2)} cUSD</strong> (Tier 2)
                       </span>
                     </div>
                   </div>
@@ -161,7 +161,7 @@ export default function DashboardPage() {
                 <div>
                   <p className="font-semibold text-green-900">Identity Verified</p>
                   <p className="text-sm text-green-700">
-                    You have full access to Tier 2 benefits - up to {(totalContributions * 2).toFixed(2)} cUSD withdrawal limit
+                    You have full access to Tier 2 benefits - up to {formatDisplayAmount(totalContributions * 2)} cUSD withdrawal limit
                   </p>
                 </div>
               </div>
@@ -206,7 +206,7 @@ export default function DashboardPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-3xl font-bold text-gray-900 mb-1">
-                    {totalContributions.toFixed(2)}
+                    {formatDisplayAmount(totalContributions)}
                   </div>
                   <p className="text-sm text-gray-500">cUSD Contributed</p>
                 </CardContent>

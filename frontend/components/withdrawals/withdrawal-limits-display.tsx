@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { CheckCircle2, Lock, TrendingUp } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { formatDisplayAmount } from "@/lib/token-utils";
 
 interface WithdrawalLimitsDisplayProps {
   totalContributions: number;
@@ -31,19 +32,19 @@ export function WithdrawalLimitsDisplay({
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm font-medium">Tier 1 Limit</p>
-            <p className="text-2xl font-bold text-green-600">{tier1Limit.toFixed(2)} cUSD</p>
+            <p className="text-2xl font-bold text-green-600">{formatDisplayAmount(tier1Limit)} cUSD</p>
             <p className="text-xs text-gray-500">No verification needed</p>
           </div>
           {isVerified ? (
             <div>
               <p className="text-sm font-medium">Tier 2 Limit</p>
-              <p className="text-2xl font-bold text-blue-600">{tier2Limit.toFixed(2)} cUSD</p>
+              <p className="text-2xl font-bold text-blue-600">{formatDisplayAmount(tier2Limit)} cUSD</p>
               <p className="text-xs text-green-600">✓ Verified</p>
             </div>
           ) : (
             <div className="opacity-60">
               <p className="text-sm font-medium">Tier 2 Limit</p>
-              <p className="text-2xl font-bold text-gray-400">{tier2Limit.toFixed(2)} cUSD</p>
+              <p className="text-2xl font-bold text-gray-400">{formatDisplayAmount(tier2Limit)} cUSD</p>
               <p className="text-xs text-gray-500">🔒 Locked</p>
             </div>
           )}
@@ -57,7 +58,7 @@ export function WithdrawalLimitsDisplay({
       <CardHeader>
         <CardTitle>Your Withdrawal Limits</CardTitle>
         <CardDescription>
-          Based on your total contributions of {totalContributions.toFixed(2)} cUSD
+          Based on your total contributions of {formatDisplayAmount(totalContributions)} cUSD
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -75,7 +76,7 @@ export function WithdrawalLimitsDisplay({
           </div>
 
           <div className="mt-3">
-            <p className="text-3xl font-bold text-green-700">{tier1Limit.toFixed(2)} cUSD</p>
+            <p className="text-3xl font-bold text-green-700">{formatDisplayAmount(tier1Limit)} cUSD</p>
             <p className="text-sm text-gray-600 mt-1">
               = 100% of your contributions
             </p>
@@ -84,7 +85,7 @@ export function WithdrawalLimitsDisplay({
           <div className="mt-3 bg-white rounded p-3 text-sm">
             <p className="font-medium mb-1">What you can do:</p>
             <ul className="list-disc list-inside space-y-1 text-gray-700">
-              <li>Request withdrawals up to {tier1Limit.toFixed(2)} cUSD</li>
+              <li>Request withdrawals up to {formatDisplayAmount(tier1Limit)} cUSD</li>
               <li>No identity verification required</li>
               <li>It&apos;s your money - fast access</li>
             </ul>
@@ -122,7 +123,7 @@ export function WithdrawalLimitsDisplay({
             <p className={`text-3xl font-bold ${
               isVerified ? "text-blue-700" : "text-gray-400"
             }`}>
-              {tier2Limit.toFixed(2)} cUSD
+              {formatDisplayAmount(tier2Limit)} cUSD
             </p>
             <p className="text-sm text-gray-600 mt-1">
               = 200% of your contributions
@@ -134,7 +135,7 @@ export function WithdrawalLimitsDisplay({
               <>
                 <p className="font-medium mb-1 text-green-700">✓ Unlocked</p>
                 <ul className="list-disc list-inside space-y-1 text-gray-700">
-                  <li>Request up to {tier2Limit.toFixed(2)} cUSD</li>
+                  <li>Request up to {formatDisplayAmount(tier2Limit)} cUSD</li>
                   <li>Access community mutual aid funds</li>
                   <li>Identity verified for security</li>
                 </ul>
@@ -177,7 +178,7 @@ export function WithdrawalLimitsDisplay({
           <Alert className="bg-blue-50 border-blue-200">
             <AlertDescription className="text-sm">
               <p className="font-semibold mb-1">💡 Optional Verification</p>
-              <p>You can already withdraw up to {tier1Limit.toFixed(2)} cUSD without verification. Verify to unlock Tier 2 for emergencies requiring more support.</p>
+              <p>You can already withdraw up to {formatDisplayAmount(tier1Limit)} cUSD without verification. Verify to unlock Tier 2 for emergencies requiring more support.</p>
             </AlertDescription>
           </Alert>
         )}

@@ -70,3 +70,19 @@ export function needsApproval(requiredAmount: bigint, currentAllowance?: bigint)
   if (!currentAllowance) return true;
   return currentAllowance < requiredAmount;
 }
+
+/**
+ * Format a number to display with up to 6 decimal places (removes trailing zeros)
+ * @param amount - Number to format
+ * @param maxDecimals - Maximum decimal places to show (default 6)
+ */
+export function formatDisplayAmount(amount: number, maxDecimals: number = 6): string {
+  // If amount is 0, return "0"
+  if (amount === 0) return "0";
+
+  // Format with max decimals, then remove trailing zeros
+  const formatted = amount.toFixed(maxDecimals);
+  const trimmed = formatted.replace(/\.?0+$/, '');
+
+  return trimmed;
+}

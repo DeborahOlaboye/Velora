@@ -16,7 +16,7 @@ import { prepareContractCall } from "thirdweb";
 import { getBenefitsPoolContract } from "@/lib/contracts";
 import { useWorkerInfo } from "@/hooks/useWorkerInfo";
 import { useWithdrawalLimits } from "@/hooks/useWithdrawalLimits";
-import { parseTokenAmount, formatTokenAmount } from "@/lib/token-utils";
+import { parseTokenAmount, formatTokenAmount, formatDisplayAmount } from "@/lib/token-utils";
 
 export function WithdrawalRequestForm() {
   const account = useActiveAccount();
@@ -51,7 +51,7 @@ export function WithdrawalRequestForm() {
         variant: "destructive" as const,
         icon: AlertCircle,
         title: "Amount Too High",
-        message: `Maximum withdrawal is ${tier2Limit.toFixed(2)} cUSD (200% of your contributions). Please reduce the amount.`,
+        message: `Maximum withdrawal is ${formatDisplayAmount(tier2Limit)} cUSD (200% of your contributions). Please reduce the amount.`,
       };
     }
 
@@ -61,7 +61,7 @@ export function WithdrawalRequestForm() {
         variant: "warning" as const,
         icon: AlertTriangle,
         title: "Verification Required",
-        message: `To withdraw more than ${tier1Limit.toFixed(2)} cUSD, you need to verify your identity. This allows access to community assistance funds.`,
+        message: `To withdraw more than ${formatDisplayAmount(tier1Limit)} cUSD, you need to verify your identity. This allows access to community assistance funds.`,
         showVerifyButton: true,
       };
     }
@@ -72,7 +72,7 @@ export function WithdrawalRequestForm() {
         variant: "info" as const,
         icon: Info,
         title: "Using Community Assistance",
-        message: `You're requesting ${(withdrawalAmount - tier1Limit).toFixed(2)} cUSD from community funds (beyond your ${tier1Limit.toFixed(2)} cUSD contributions).`,
+        message: `You're requesting ${formatDisplayAmount(withdrawalAmount - tier1Limit)} cUSD from community funds (beyond your ${formatDisplayAmount(tier1Limit)} cUSD contributions).`,
       };
     }
 
@@ -118,9 +118,9 @@ export function WithdrawalRequestForm() {
     // Validate against tiered limits
     if (withdrawalAmount > currentMaxWithdrawal) {
       if (!isVerified && withdrawalAmount <= tier2Limit) {
-        setErrorMessage(`Please verify your identity to withdraw up to ${tier2Limit.toFixed(2)} cUSD. Current limit: ${tier1Limit.toFixed(2)} cUSD`);
+        setErrorMessage(`Please verify your identity to withdraw up to ${formatDisplayAmount(tier2Limit)} cUSD. Current limit: ${formatDisplayAmount(tier1Limit)} cUSD`);
       } else {
-        setErrorMessage(`Maximum withdrawal is ${tier2Limit.toFixed(2)} cUSD (200% of contributions)`);
+        setErrorMessage(`Maximum withdrawal is ${formatDisplayAmount(tier2Limit)} cUSD (200% of contributions)`);
       }
       setStatus("error");
       return;
@@ -218,12 +218,12 @@ export function WithdrawalRequestForm() {
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
             disabled={isSubmitting}
-            placeholder={`Max: ${currentMaxWithdrawal.toFixed(2)} cUSD`}
+            placeholder={`Max: ${formatDisplayAmount(currentMaxWithdrawal)} cUSD`}
             className="h-12 text-lg font-semibold"
           />
           <p className="text-sm text-gray-600">
-            Your limit: <strong>{currentMaxWithdrawal.toFixed(2)} cUSD</strong>
-            {!isVerified && ` • Verify to unlock ${tier2Limit.toFixed(2)} cUSD`}
+            Your limit: <strong>{formatDisplayAmount(currentMaxWithdrawal)} cUSD</strong>
+            {!isVerified && ` • Verify to unlock ${formatDisplayAmount(tier2Limit)} cUSD`}
           </p>
         </div>
 
