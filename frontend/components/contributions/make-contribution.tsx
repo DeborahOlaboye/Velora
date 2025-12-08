@@ -36,8 +36,8 @@ export function MakeContribution() {
     }
 
     const contributionAmount = parseFloat(amount);
-    if (contributionAmount < 5) {
-      setErrorMessage("Minimum contribution is 5 cUSD");
+    if (contributionAmount <= 0) {
+      setErrorMessage("Please enter a valid contribution amount");
       setStatus("error");
       return;
     }
@@ -91,8 +91,8 @@ export function MakeContribution() {
     }
 
     const contributionAmount = parseFloat(amount);
-    if (contributionAmount < 5) {
-      setErrorMessage("Minimum contribution is 5 cUSD");
+    if (contributionAmount <= 0) {
+      setErrorMessage("Please enter a valid contribution amount");
       setStatus("error");
       return;
     }
