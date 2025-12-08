@@ -9,6 +9,9 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Velora - Mutual Aid for the Modern Worker",
   description: "A decentralized platform where gig workers collectively pool resources for emergency funds. Powered by Celo, Self Protocol, and GoodDollar.",
+  icons: {
+    icon: "/favicon.ico",
+  },
 };
 
 export default function RootLayout({

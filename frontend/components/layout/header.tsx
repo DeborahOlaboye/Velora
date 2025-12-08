@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useActiveAccount } from "thirdweb/react";
 import { ConnectWalletButton } from "@/components/wallet/connect-wallet-button";
 import { Shield, Menu, X } from "lucide-react";
@@ -16,11 +17,17 @@ export function Header() {
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center">
-              <Shield className="w-5 h-5 text-white" />
+          <Link href="/" className="flex items-center hover:opacity-80 transition-opacity h-full">
+            <div className="relative h-16 w-32 overflow-visible">
+              <Image 
+                src="/logo.png" 
+                alt="Velora Logo" 
+                width={200} 
+                height={200}
+                className="absolute -top-1/2 left-0 w-auto h-[200%] object-contain"
+                priority
+              />
             </div>
-            <span className="text-xl font-bold text-gray-900">Velora</span>
           </Link>
 
           {/* Desktop Navigation */}

@@ -7,6 +7,7 @@ import Link from "next/link";
 import { Header } from "@/components/layout/header";
 import { WorkerProfile } from "@/components/profile/worker-profile";
 import { ClaimWidget } from "@/components/gooddollar/claim-widget";
+import { GoodDollarStats } from "@/components/gooddollar/gooddollar-stats";
 import { SelfProtocolVerifier } from "@/components/verification/self-protocol-verifier";
 import { PoolStats } from "@/components/pool/pool-stats";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -299,6 +300,9 @@ export default function DashboardPage() {
           </TabsContent>
 
           <TabsContent value="gooddollar" className="space-y-6">
+            {/* GoodDollar Stats Display */}
+            <GoodDollarStats />
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <ClaimWidget
                 environment={
