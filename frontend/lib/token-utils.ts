@@ -6,17 +6,25 @@ import { BENEFITS_POOL_ADDRESS } from "./thirdweb-client";
  * Format token amount from wei to human-readable format
  * @param amount - Amount in wei (bigint)
  * @param decimals - Token decimals (default 18 for cUSD)
+ * @param displayDecimals - Number of decimal places to display (default 6)
  */
-export function formatTokenAmount(amount: bigint, decimals: number = 18): string {
+export function formatTokenAmount(
+  amount: bigint,
+  decimals: number = 18,
+  displayDecimals: number = 6
+): string {
   const divisor = BigInt(10 ** decimals);
   const whole = amount / divisor;
   const remainder = amount % divisor;
 
   // Convert remainder to decimal string with proper padding
   const decimalStr = remainder.toString().padStart(decimals, '0');
-  const trimmedDecimal = decimalStr.slice(0, 2); // Show 2 decimal places
+  const trimmedDecimal = decimalStr.slice(0, displayDecimals);
 
-  return `${whole}.${trimmedDecimal}`;
+  // Remove trailing zeros for cleaner display
+  const cleanDecimal = trimmedDecimal.replace(/0+$/, '');
+
+  return cleanDecimal ? `${whole}.${cleanDecimal}` : `${whole}`;
 }
 
 /**
