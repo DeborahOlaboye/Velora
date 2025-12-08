@@ -59,7 +59,7 @@ export function WorkerRegistrationForm() {
     location: "",
     yearsExperience: "",
     monthlyIncome: "",
-    initialContribution: "5",
+    initialContribution: "1",
     agreedToTerms: false,
   });
 
@@ -386,9 +386,9 @@ export function WorkerRegistrationForm() {
               <Input
                 id="contribution"
                 type="number"
-                min="5"
+                min="0.01"
                 step="0.01"
-                placeholder="5.00"
+                placeholder="1.00"
                 value={workerData.initialContribution}
                 onChange={(e) =>
                   setWorkerData({ ...workerData, initialContribution: e.target.value })
@@ -396,7 +396,7 @@ export function WorkerRegistrationForm() {
                 className="h-11 text-lg"
               />
               <p className="text-sm text-gray-600">
-                Minimum: 5 cUSD - Your contributions build your emergency fund
+                Any amount welcome - Your contributions build your emergency fund
               </p>
             </div>
 
@@ -437,7 +437,7 @@ export function WorkerRegistrationForm() {
               </Button>
               <Button
                 onClick={handleNext}
-                disabled={parseFloat(workerData.initialContribution) < 5}
+                disabled={parseFloat(workerData.initialContribution) <= 0}
                 className="bg-blue-600 hover:bg-blue-700 px-8"
               >
                 Next Step
