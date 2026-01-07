@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
 
 /**
  * POST /api/engagement/track
  *
- * Track engagement reward claims in the database
+ * Track engagement reward claims (simplified - no database)
  */
 export async function POST(request: NextRequest) {
   try {
@@ -18,77 +17,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Find or create user
-    const user = await prisma.user.upsert({
-      where: { walletAddress: userAddress.toLowerCase() },
-      update: {},
-      create: {
-        walletAddress: userAddress.toLowerCase(),
-        isRegistered: false,
-      },
+    // Just log to console for now
+    console.log("Engagement reward claimed:", {
+      user: userAddress,
+      inviter: inviterAddress,
+      txHash,
+      success,
+      timestamp,
     });
-
-    // Update engagement reward status
-    if (success && txHash) {
-      await prisma.user.update({
-        where: { id: user.id },
-        data: {
-          hasClaimedEngagementReward: true,
-          engagementRewardClaimedAt: new Date(timestamp),
-          engagementRewardTxHash: txHash,
-        },
-      });
-
-      // Create engagement reward record
-      await prisma.engagementReward.create({
-        data: {
-          userId: user.id,
-          rewardType: "REGISTRATION",
-          amount: 10, // Default registration reward amount
-          currency: "G$",
-          inviterAddress: inviterAddress?.toLowerCase() || null,
-          txHash,
-          status: "CLAIMED",
-          claimedAt: new Date(timestamp),
-        },
-      });
-
-      // Update inviter stats if applicable
-      if (inviterAddress) {
-        try {
-          const inviter = await prisma.user.findUnique({
-            where: { walletAddress: inviterAddress.toLowerCase() },
-          });
-
-          if (inviter) {
-            await prisma.user.update({
-              where: { id: inviter.id },
-              data: {
-                successfulInvites: { increment: 1 },
-              },
-            });
-          }
-        } catch (error) {
-          console.error("Error updating inviter stats:", error);
-          // Don't fail the whole request if inviter update fails
-        }
-      }
-
-      // Log activity
-      await prisma.activityLog.create({
-        data: {
-          userId: user.id,
-          action: "ENGAGEMENT_REWARD_CLAIMED",
-          entityType: "EngagementReward",
-          metadata: {
-            txHash,
-            inviterAddress,
-            timestamp,
-            success,
-          },
-        },
-      });
-    }
 
     return NextResponse.json({
       success: true,

@@ -10,6 +10,7 @@ import { ClaimWidget } from "@/components/gooddollar/claim-widget";
 import { GoodDollarStats } from "@/components/gooddollar/gooddollar-stats";
 import { SelfProtocolVerifier } from "@/components/verification/self-protocol-verifier";
 import { PoolStats } from "@/components/pool/pool-stats";
+import { InviteCard } from "@/components/engagement/invite-card";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -289,14 +290,32 @@ export default function DashboardPage() {
 
         {/* Tabs Section */}
         <Tabs defaultValue="profile" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3 bg-white">
+          <TabsList className="grid w-full grid-cols-4 bg-white">
             <TabsTrigger value="profile">Profile</TabsTrigger>
+            <TabsTrigger value="invites">Invite & Earn</TabsTrigger>
             <TabsTrigger value="gooddollar">GoodDollar</TabsTrigger>
             <TabsTrigger value="verification">Verification</TabsTrigger>
           </TabsList>
 
           <TabsContent value="profile" className="space-y-6">
             <WorkerProfile />
+          </TabsContent>
+
+          <TabsContent value="invites" className="space-y-6">
+            {/* Invite Card Component */}
+            {workerInfo?.isRegistered ? (
+              <InviteCard />
+            ) : (
+              <Alert className="bg-blue-50 border-blue-200">
+                <AlertCircle className="h-5 w-5 text-blue-600" />
+                <AlertDescription>
+                  <p className="font-semibold text-blue-900 mb-1">Register First</p>
+                  <p className="text-sm text-blue-700">
+                    You need to register as a worker before you can invite others and earn rewards.
+                  </p>
+                </AlertDescription>
+              </Alert>
+            )}
           </TabsContent>
 
           <TabsContent value="gooddollar" className="space-y-6">
