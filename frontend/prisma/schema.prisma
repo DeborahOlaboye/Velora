@@ -44,17 +44,29 @@ model User {
   isSuspended     Boolean @default(false)
   suspendedReason String?
 
+  // Engagement Rewards & Referrals
+  invitedBy                   String? // Wallet address of inviter
+  inviter                     User?   @relation("UserInvites", fields: [invitedBy], references: [walletAddress], onDelete: SetNull)
+  invitedUsers                User[]  @relation("UserInvites")
+  hasClaimedEngagementReward  Boolean @default(false)
+  engagementRewardClaimedAt   DateTime?
+  engagementRewardTxHash      String?
+  totalInvites                Int     @default(0)
+  successfulInvites           Int     @default(0)
+
   // Relationships
   contributions      Contribution[]
   withdrawalRequests WithdrawalRequest[]
   votes              Vote[]
   notifications      Notification[]
   activityLogs       ActivityLog[]
+  engagementRewards  EngagementReward[]
 
   @@index([walletAddress])
   @@index([isSelfVerified])
   @@index([isRegistered])
   @@index([createdAt])
+  @@index([invitedBy])
 }
 
 // Contribution tracking
@@ -242,4 +254,38 @@ model SyncStatus {
   @@unique([contractAddress, eventType])
   @@index([contractAddress])
   @@index([lastSyncedAt])
+}
+
+// Engagement rewards tracking
+model EngagementReward {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  // Reward details
+  rewardType    String  // REGISTRATION, CONTRIBUTION, MILESTONE, etc.
+  amount        Decimal @db.Decimal(18, 6)
+  currency      String  @default("G$")
+
+  // Inviter information
+  inviterUserId String?
+  inviterAddress String?
+
+  // Blockchain transaction
+  txHash      String?
+  blockNumber Int?
+  status      String   @default("PENDING") // PENDING, CLAIMED, FAILED
+
+  // Metadata
+  metadata Json? // Additional data about the reward
+
+  // Timestamps
+  claimedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+  @@index([status])
+  @@index([rewardType])
+  @@index([createdAt])
+  @@index([inviterUserId])
 }

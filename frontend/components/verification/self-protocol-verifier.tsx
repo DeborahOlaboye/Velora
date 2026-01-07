@@ -7,7 +7,6 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { CheckCircle2, XCircle, Loader2, Smartphone } from "lucide-react";
 import { getUniversalLink } from "@selfxyz/core";
 import { SelfQRcodeWrapper, SelfAppBuilder, type SelfApp } from "@selfxyz/qrcode";
-import { ethers } from "ethers";
 
 interface SelfProtocolVerifierProps {
   onVerificationComplete?: (verified: boolean, userId: string) => void;
@@ -35,16 +34,19 @@ export function SelfProtocolVerifier({
     if (!account?.address) return;
 
     try {
+      const deeplinkCallbackUrl = `${process.env.NEXT_PUBLIC_APP_URL}/verify?address=${account.address}`;
+      
       const app = new SelfAppBuilder({
         version: 2,
         appName: process.env.NEXT_PUBLIC_SELF_APP_NAME || "Velora",
         scope: process.env.NEXT_PUBLIC_SELF_SCOPE || "velora-benefits-pool",
         endpoint: process.env.NEXT_PUBLIC_SELF_ENDPOINT || "https://api.self.xyz",
-        logoBase64: `${process.env.NEXT_PUBLIC_APP_URL}/logo.png`, // Use your hosted logo
+        logoBase64: "https://i.postimg.cc/mrmVf9hm/self.png",
         userId: account.address,
         endpointType: (process.env.NEXT_PUBLIC_SELF_ENDPOINT_TYPE as any) || "production_https",
         userIdType: "hex",
         userDefinedData: "Velora Identity Verification for Benefits Pool Access",
+        deeplinkCallback: deeplinkCallbackUrl,
         disclosures: {
           minimumAge: minimumAge,
           nationality: requiredDisclosures.nationality,
@@ -54,9 +56,9 @@ export function SelfProtocolVerifier({
 
       setSelfApp(app);
       setUniversalLink(getUniversalLink(app));
-      setVerificationStatus("pending"); // Move to pending state once QR code is ready
+      setVerificationStatus("pending");
     } catch (error) {
-      console.error("Failed to initialize Self app:", error);
+      console.error("❌ Failed to initialize Self app:", error);
       setErrorMessage("Failed to initialize verification service");
       setVerificationStatus("failed");
     }

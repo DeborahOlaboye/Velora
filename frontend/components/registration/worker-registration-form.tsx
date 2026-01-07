@@ -12,6 +12,8 @@ import { CheckCircle2, Loader2 } from "lucide-react";
 import { prepareContractCall } from "thirdweb";
 import { getBenefitsPoolContract } from "@/lib/contracts";
 import { useWorkerInfo } from "@/hooks/useWorkerInfo";
+import { useEngagementRewards } from "@/hooks/useEngagementRewards";
+import { ethers } from "ethers";
 
 interface WorkerData {
   gigWorkType: string;
@@ -50,6 +52,7 @@ export function WorkerRegistrationForm() {
   const account = useActiveAccount();
   const { mutateAsync: sendTransaction } = useSendTransaction();
   const { workerInfo, refetch: refetchWorkerInfo } = useWorkerInfo(account?.address);
+  const { inviterAddress, hasInviteCode } = useEngagementRewards();
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
@@ -92,16 +95,22 @@ export function WorkerRegistrationForm() {
         return;
       }
 
-      // Prepare contract call to registerWorker() with metadata
+      // Prepare contract call to registerWorker() with engagement rewards parameters
       const contract = getBenefitsPoolContract();
+
+      // For V2 contract, we need: gigWorkType, location, yearsExperience, monthlyIncome, inviter, validUntilBlock, signature
+      // For now, we'll pass zero values for engagement rewards params (user can claim rewards separately)
       const transaction = prepareContractCall({
         contract,
-        method: "function registerWorker(string _gigWorkType, string _location, uint8 _yearsExperience, uint256 _monthlyIncome)",
+        method: "function registerWorker(string _gigWorkType, string _location, uint8 _yearsExperience, uint256 _monthlyIncome, address _inviter, uint256 _validUntilBlock, bytes _signature)",
         params: [
           workerData.gigWorkType,
           workerData.location,
           parseInt(workerData.yearsExperience) || 0,
           BigInt(Math.floor(parseFloat(workerData.monthlyIncome) || 0)),
+          inviterAddress || ethers.ZeroAddress, // Inviter address (or zero if none)
+          0n, // validUntilBlock = 0 (not claiming rewards during registration)
+          "0x", // Empty signature (not claiming rewards during registration)
         ],
       });
 
