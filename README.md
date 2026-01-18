@@ -294,28 +294,100 @@ This project is being built in **15 phases with 64 checkpoints**.
 
 Velora is built for **Proof of Ship #10** (November 2025) on the Celo blockchain.
 
-### How to Contribute
+### Ways to Contribute
+
+- **Core Features**: Enhance the mutual aid functionality, voting mechanisms, or contribution systems
+- **User Experience**: Improve the UI/UX for gig workers, especially mobile-first design
+- **Security**: Audit and improve smart contract security, add new safety mechanisms
+- **Integrations**: Add new DeFi integrations, payment methods, or identity verification providers
+- **Documentation**: Improve docs, add tutorials, create user guides for different languages
+- **Testing**: Add comprehensive test coverage for contracts, frontend, and integration tests
+- **Accessibility**: Ensure the platform is accessible to workers with disabilities
+- **Localization**: Add support for multiple languages (Spanish, Tagalog, Indonesian, etc.)
+- **Analytics**: Build dashboards for tracking mutual aid impact and platform usage
+
+### Development Workflow
 
 1. **Fork the repository**
 2. **Create a feature branch** (`git checkout -b feature/amazing-feature`)
-3. **Commit your changes** (`git commit -m 'Add amazing feature'`)
-4. **Push to the branch** (`git push origin feature/amazing-feature`)
-5. **Open a Pull Request**
+3. **Make your changes** following the guidelines below
+4. **Write tests** for new functionality
+5. **Update documentation** for any API or user-facing changes
+6. **Commit your changes** (`git commit -m 'Add amazing feature'`)
+7. **Push to the branch** (`git push origin feature/amazing-feature`)
+8. **Open a Pull Request** with a clear description
 
 ### Development Guidelines
 
-- Follow TypeScript best practices
-- Write tests for new features
-- Update documentation for API changes
-- Follow the existing code style (use ESLint)
-- Keep commits atomic and well-described
+#### Frontend (Next.js/React)
+- Use TypeScript for all new code
+- Follow React best practices and hooks patterns
+- Ensure mobile-first responsive design
+- Test on multiple wallet connections (MetaMask, Coinbase Wallet, etc.)
+- Handle error states gracefully with user-friendly messages
+- Use the existing shadcn/ui component library
+- Follow the established Tailwind CSS patterns
+
+#### Smart Contracts (Solidity)
+- Use OpenZeppelin contracts for security
+- Add comprehensive NatSpec documentation
+- Write Foundry tests for all functions
+- Optimize for gas efficiency
+- Include proper error handling with custom errors
+- Follow the Checks-Effects-Interactions pattern
+
+#### Backend (Next.js API Routes)
+- Use TypeScript for type safety
+- Validate all inputs with Zod schemas
+- Implement proper error handling
+- Add request/response logging for debugging
+- Use Prisma ORM for database operations
+- Follow REST API best practices
+
+#### Database (PostgreSQL/Prisma)
+- Use Prisma migrations for schema changes
+- Add proper indexes for performance
+- Implement data validation at the schema level
+- Document complex queries and relationships
+
+### Code Standards
+
+- **Linting**: Use ESLint with the configured rules
+- **Formatting**: Code is automatically formatted with Prettier
+- **Commits**: Use conventional commit format
+- **Branches**: Use descriptive branch names (`feature/`, `fix/`, `docs/`, etc.)
+- **PRs**: Include screenshots for UI changes, test coverage for code changes
+
+### Testing Requirements
+
+- **Unit Tests**: All functions and components must have unit tests
+- **Integration Tests**: API routes and contract interactions need integration tests
+- **E2E Tests**: Critical user flows should have end-to-end tests
+- **Test Coverage**: Maintain >80% test coverage for new features
+- **Contract Tests**: All smart contract functions need Foundry tests
+
+### Security Considerations
+
+- **Smart Contracts**: Never modify audited code without security review
+- **API Keys**: Never commit sensitive keys or credentials
+- **Input Validation**: Validate all user inputs on frontend and backend
+- **Reentrancy**: All contract functions must be protected against reentrancy
+- **Access Control**: Implement proper role-based access controls
 
 ### Code of Conduct
 
-- Be respectful and inclusive
-- Focus on constructive feedback
-- Help newcomers get started
-- Report security issues privately
+- **Be Respectful**: Treat all contributors with respect and kindness
+- **Inclusive**: Welcome contributors from all backgrounds and experience levels
+- **Constructive**: Focus on constructive feedback and solutions
+- **Helpful**: Assist newcomers in getting started with the project
+- **Ethical**: Report security issues privately and responsibly
+
+### Reporting Issues
+
+- **Bug Reports**: Use the issue template with steps to reproduce
+- **Security Issues**: Report privately to security@velora.network
+- **Feature Requests**: Use the feature request template with detailed rationale
+- **Performance Issues**: Include profiling data and steps to reproduce
 
 ---
 
