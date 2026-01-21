@@ -1,0 +1,89 @@
+version: '3.8'
+
+services:
+  # Frontend Next.js application
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_APP_NAME=Velora
+      - DATABASE_URL=postgresql://velora:password@db:5432/velora
+      - NEXTAUTH_URL=http://localhost:3000
+      - NEXTAUTH_SECRET=your-secret-key-change-this
+      - NEXT_PUBLIC_RPC_URL=https://mainnet.base.org
+    depends_on:
+      - db
+    volumes:
+      - ./frontend/.env.local:/app/.env.local:ro
+    networks:
+      - velora-network
+    restart: unless-stopped
+
+  # PostgreSQL database
+  db:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=velora
+      - POSTGRES_USER=velora
+      - POSTGRES_PASSWORD=password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+    networks:
+      - velora-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U velora -d velora"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis for caching (optional)
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - velora-network
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+
+  # Foundry development environment (for contract development)
+  foundry:
+    image: ghcr.io/foundry-rs/foundry:latest
+    working_dir: /workspace
+    volumes:
+      - ./contract:/workspace
+      - ./contract/.env:/workspace/.env:ro
+    networks:
+      - velora-network
+    command: sleep infinity
+    profiles:
+      - dev
+
+  # Local Ethereum node (Anvil) for testing
+  anvil:
+    image: ghcr.io/foundry-rs/foundry:latest
+    ports:
+      - "8545:8545"
+    command: anvil --host 0.0.0.0 --port 8545
+    networks:
+      - velora-network
+    profiles:
+      - dev
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  velora-network:
+    driver: bridge
