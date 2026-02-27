@@ -473,4 +473,25 @@ contract BenefitsPool is Ownable, ReentrancyGuard, Pausable {
     function getContractBalance() external view returns (uint256) {
         return cUSD.balanceOf(address(this));
     }
+
+    /**
+     * @dev Get contract version
+     */
+    function getVersion() external pure returns (string memory) {
+        return "1.0.0";
+    }
+
+    /**
+     * @dev Get contract owner address
+     */
+    function getOwnerAddress() external view returns (address) {
+        return owner();
+    }
+
+    /**
+     * @dev Check if pool is paused
+     */
+    function isPaused() external view returns (bool) {
+        return paused();
+    }
 }
